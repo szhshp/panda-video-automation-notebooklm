@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "publisher": {
+      "source": "szhshp/panda-video-automations-publisher",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/publisher/SKILL.md",
+      "computedHash": "64b424c87aa40c9ea02112accff4d64e3ba294ec7b4b081f89a066fd18fddcdb"
+    },
+    "pva-publisher": {
+      "source": "szhshp/panda-video-automations-publisher",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/publisher/SKILL.md",
+      "computedHash": "f3c9ebf6ff26fab066cdedddbb9151f0b40d086c1c9b4170340bbde9a02f9418"
+    }
+  }
+}

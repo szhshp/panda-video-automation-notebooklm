@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./docs/panda-notebooklm.png" width="200" alt="Panda Video NotebookLM Logo">
+  <img src="./docs/assets/panda-notebooklm.png" width="200" alt="Panda Video NotebookLM Logo">
   
   # Panda Video Automation - NotebookLM Integration
   
@@ -74,8 +74,19 @@
 ## ❇️ 功能演示
 
 <a href="https://www.bilibili.com/video/BV1ZsGU6YEo3/">
-  <img src="docs/cover.png" alt="功能演示 · 点击在 Bilibili 播放" width="480" />
+  <img src="docs/assets/cover.png" alt="工作流演示 · 点击在 Bilibili 播放" width="480" />
 </a>
+
+**🤖 工作流演示** — 工具操作全流程
+
+<a id="showcase"></a>
+## ❇️ 成品展示
+
+<a href="https://www.bilibili.com/video/BV1StG66bEne/">
+  <img src="docs/assets/demo-1.png" alt="成品展示 · 点击在 Bilibili 播放" width="480" />
+</a>
+
+**🎬 成品展示** — NotebookLM 成品视频示例
 
 ---
 

@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 .claude/
+input/
+output/
+定稿.mp4

@@ -1,11 +1,9 @@
 <div align="center">
   <img src="./docs/panda-notebooklm.png" width="200" alt="Panda Video NotebookLM Logo">
   
-  # Panda Video — NotebookLM
+  # Panda Video Automation - NotebookLM Integration
   
-  **NotebookLM 视频自动化引擎**
-
-  *灵感源自 Panda Video Generator · 专为 NotebookLM 笔记转视频场景优化*
+  **熊猫视频自动化生态下的 NotebookLM 笔记转视频自动化工具集**
 
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
@@ -14,7 +12,7 @@
 ---
 
 <div align="center" style="margin: 12px 0 20px;">
-  <a href="https://github.com/szhshp/panda-video-automation-notebooklm" title="Panda Video NotebookLM 仓库" style="display: inline-block; padding: 12px 28px; border: 2px solid #0969da; border-radius: 8px; font-weight: 700; font-size: 1.05em; text-decoration: none; color: #0969da;">GitHub 仓库</a>
+  <a href="https://panda.szhshp.org" title="Panda Video 项目主页" style="display: inline-block; padding: 12px 28px; border: 2px solid #0969da; border-radius: 8px; font-weight: 700; font-size: 1.05em; text-decoration: none; color: #fff; background: #0969da;">🌐 项目主页</a>
 </div>
 
 ## 上游项目
@@ -62,16 +60,30 @@
 </table>
 
 ---
+<!-- TODO -->
 
 ## 📖 简介
 
-**Panda Video — NotebookLM** 灵感源自 [Panda Video Generator](https://github.com/szhshp/panda-video-generator), 发布上传部分基于 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher). 专注于 NotebookLM 笔记转视频场景, 提供从 NotebookLM 笔记本创建, 研究, 视频导出到多平台发布的一站式自动化工作流. 
+把 NotebookLM 里的研究成果一键变成视频，再自动发到 B 站、抖音、视频号——这就是 **Panda Video — NotebookLM**。
+
+它脱胎于 [Panda Video Generator](https://github.com/szhshp/panda-video-generator) 的视频生产流水线，上传模块来自 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher)。从创建笔记本、做研究、导出视频，到多平台发布，一条命令全搞定。不用手动下载、不用反复登录、不用逐个平台传。
+
+---
+
+<a id="demo"></a>
+## ❇️ 功能演示
+
+<a href="https://www.bilibili.com/video/BV1ZsGU6YEo3/">
+  <img src="docs/cover.png" alt="功能演示 · 点击在 Bilibili 播放" width="480" />
+</a>
 
 ---
 
 ## 🚀 快速开始
 
-### TL'DR 
+### TL'DR
+
+
 
 
 向 Agent (一次性或分步) 发送以下文本:
@@ -80,7 +92,7 @@
 2. `/notebooklm-status` 检查我的登录状态
 3. `/notebooklm-research` 创建一个 NotebookLM 笔记本并执行深度研究, 研究主题是 "AI 泡沫还能持续多久? "
 4. (5 分钟后) `/notebooklm-video` 从笔记本生成一个视频
-6. (5 分钟后) `/notebooklm-status` 查看笔记本和视频制品状态, 确认视频已生成并下载到本地
+6. (15 分钟后) `/notebooklm-status` 查看笔记本和视频制品状态, 确认视频已生成并下载到本地
 6. 使用 `pva CLI` 登录特定平台并上传视频, 我需要登录到 B 站和抖音 (如果不久前已登录过, 则跳过登录步骤)
 7. 帮我批量发布到 B 站和抖音
 

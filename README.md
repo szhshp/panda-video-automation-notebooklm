@@ -32,15 +32,15 @@
   <tr valign="top">
     <td width="34%" valign="top">
       <h3>📝 <mark>一键</mark> NotebookLM 研究</h3>
-      <p>一键创建笔记本、Web 研究、导入来源，自动完成 NotebookLM 研究流程。</p>
+      <p>一键创建笔记本, Web 研究, 导入来源, 自动完成 NotebookLM 研究流程. </p>
     </td>
     <td width="33%" valign="top">
       <h3>🎬 <mark>一键</mark>视频生成</h3>
-      <p>一键从 NotebookLM 笔记本导出视频制品（Deep Dive 对话 / 音频概览），自动下载并准备上传。</p>
+      <p>一键从 NotebookLM 笔记本导出视频制品 (Deep Dive 对话 / 音频概览) , 自动下载并准备上传. </p>
     </td>
     <td width="33%" valign="top">
       <h3>🚀 <mark>一键</mark>多平台发布</h3>
-      <p>一键驱动浏览器自动化上传；B 站、抖音、微信视频号、小红书等共用相近流程。</p>
+      <p>一键驱动浏览器自动化上传; B 站, 抖音, 微信视频号, 小红书等共用相近流程. </p>
     </td>
   </tr>
 </table>
@@ -52,11 +52,11 @@
     <td width="100%" valign="top">
       <h3>🤖 Agent Skills 方式</h3>
       <ul>
-        <li>在 AI Agent 中直接运行技能，编排 NotebookLM 视频生成流程。</li>
-        <li>支持研究、视频下载、多平台上传等技能。</li>
-        <li>支持 Cursor、Claude Code、Copilot 等常用 AI Agent。</li>
+        <li>在 AI Agent 中直接运行技能, 编排 NotebookLM 视频生成流程. </li>
+        <li>支持研究, 视频下载, 多平台上传等技能. </li>
+        <li>支持 Cursor, Claude Code, Copilot 等常用 AI Agent. </li>
       </ul>
-      <p>无需手动安装 CLI，首次运行 <code>/setup-pva-notebooklm</code> 技能即可自动完成依赖检查和安装。</p>
+      <p>无需手动安装 CLI, 首次运行 <code>/setup-pva-notebooklm</code> 技能即可自动完成依赖检查和安装. </p>
     </td>
   </tr>
 </table>
@@ -65,22 +65,32 @@
 
 ## 📖 简介
 
-**Panda Video — NotebookLM** 灵感源自 [Panda Video Generator](https://github.com/szhshp/panda-video-generator)，发布上传部分基于 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher)。专注于 NotebookLM 笔记转视频场景，提供从 NotebookLM 笔记本创建、研究、视频导出到多平台发布的一站式自动化工作流。
+**Panda Video — NotebookLM** 灵感源自 [Panda Video Generator](https://github.com/szhshp/panda-video-generator), 发布上传部分基于 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher). 专注于 NotebookLM 笔记转视频场景, 提供从 NotebookLM 笔记本创建, 研究, 视频导出到多平台发布的一站式自动化工作流. 
 
 ---
 
 ## 🚀 快速开始
 
-### TL'DR
+### TL'DR 
 
-在 AI Agent 中直接运行技能 `/setup-pva-notebooklm`，自动检查所有依赖是否就绪。
+
+向 Agent (一次性或分步) 发送以下文本:
+
+1. `/setup-pva-notebooklm` 检查并安装所有前置依赖
+2. `/notebooklm-status` 检查我的登录状态
+3. `/notebooklm-research` 创建一个 NotebookLM 笔记本并执行深度研究, 研究主题是 "AI 泡沫还能持续多久? "
+4. (5 分钟后) `/notebooklm-video` 从笔记本生成一个视频
+6. (5 分钟后) `/notebooklm-status` 查看笔记本和视频制品状态, 确认视频已生成并下载到本地
+6. 使用 `pva CLI` 登录特定平台并上传视频, 我需要登录到 B 站和抖音 (如果不久前已登录过, 则跳过登录步骤)
+7. 帮我批量发布到 B 站和抖音
+
 
 ### 先决条件
 
-- **Python 3** — 安装 [notebooklm-py](https://pypi.org/project/notebooklm-py/)
+- **Python 3** 
+  — [notebooklm-py](https://pypi.org/project/notebooklm-py/)
 - **Node.js 20+**
-
-> **无需手动安装 PVA CLI**。首次运行技能 `/setup-pva-notebooklm` 会自动完成依赖检查和安装。
+  — [@panda-video-automation/pva](https://www.npmjs.com/package/@panda-video-automation/pva)
 
 ---
 
@@ -99,13 +109,13 @@
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提交 Issue 和 Pull Request! 
 
 ---
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+本项目采用 MIT 许可证. 详见 [LICENSE](LICENSE) 文件. 
 
 ---
 
@@ -120,7 +130,7 @@
 
 ## ⚠️ 免责声明
 
-本项目按「原样」提供，作者不对因使用本软件而产生的任何直接、间接或附带损失承担责任。你在使用爬虫、文本转语音、视频生成、浏览器自动化上传等功能时，须**自行确保**符合适用法律法规、各内容/社交平台的服务条款、robots 规则及版权与隐私要求；请勿将本工具用于未经授权的抓取、侵权转载或垃圾信息传播。本仓库与第三方平台**无任何隶属或合作关系**；相关商标与产品名称归各自权利人所有。以上说明不构成法律意见；如有合规疑虑，请咨询专业人士。
+本项目按「原样」提供, 作者不对因使用本软件而产生的任何直接, 间接或附带损失承担责任. 你在使用爬虫, 文本转语音, 视频生成, 浏览器自动化上传等功能时, 须**自行确保**符合适用法律法规, 各内容/社交平台的服务条款, robots 规则及版权与隐私要求; 请勿将本工具用于未经授权的抓取, 侵权转载或垃圾信息传播. 本仓库与第三方平台**无任何隶属或合作关系**; 相关商标与产品名称归各自权利人所有. 以上说明不构成法律意见; 如有合规疑虑, 请咨询专业人士. 
 
 ---
 

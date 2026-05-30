@@ -27,8 +27,8 @@ output/
 Ask the user for:
 1. **Source video path** — where the downloaded video is located
 2. **Video topic or title** (optional) — if the user doesn't provide one, infer the topic from the filename automatically
-3. **Description** (optional) — will be set as `VIDEO_DESC` env var
-4. **Tags** (optional, comma-separated) — will be set as `VIDEO_TAGS` env var
+3. **Description** (optional) — will be set as `VIDEO_DESC` env var. Constraints: first line must be a headline title, at most **3 topics**, each line ≤ **200 characters** total.
+4. **Tags** (optional, comma-separated, **max 3**) — will be set as `VIDEO_TAGS` env var. Most platforms (e.g. Bilibili) limit tags to 3. Pick the most relevant ones.
 
 ### Step 2: Generate Engaging Title
 

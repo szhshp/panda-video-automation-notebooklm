@@ -21,8 +21,8 @@ Cross-platform video upload using the `pva` CLI tool.
 
 - `--video <path>` — Path to video file (or `VIDEO_PATH` env)
 - `--title <text>` — Video title (or `VIDEO_TITLE` env)
-- `--desc <text>` — Video description (or `VIDEO_DESC` env)
-- `--tags <list>` — Comma-separated tags (or `VIDEO_TAGS` env)
+- `--desc <text>` — Video description (or `VIDEO_DESC` env). First line = headline title, at most **3 topics**, each line ≤ **30 chars**.
+- `--tags <list>` — Comma-separated tags, **max 3**. Most platforms restrict tags to 3. Pick the most relevant ones. (or `VIDEO_TAGS` env)
 - `--cover <path>` — Cover image path (or `VIDEO_COVER` env)
 - `--privacy <mode>` — YouTube only: `public|unlisted|private` (default: `unlisted`)
 - `--headless` — Run browser in headless mode (default: **headed**)

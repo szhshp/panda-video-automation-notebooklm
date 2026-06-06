@@ -2,6 +2,6 @@
   "name": "panda-video-automation-notebooklm-py",
   "private": true,
   "dependencies": {
-    "@panda-video-automation/pva": "^0.1.7"
+    "@panda-video-automation/pva": "^0.1.8"
   }
 }

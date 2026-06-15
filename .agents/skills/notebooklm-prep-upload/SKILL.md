@@ -70,15 +70,22 @@ Copy the source video to `output/video/video.mp4`:
 cp "<source-path>" "output/video/video.mp4"
 ```
 
-### Step 6: Extract Cover Image from Video
+### Step 6: Generate Minimalist Academic Cover
 
-Extract the first frame of the video as a cover image for Bilibili upload:
+Use the [minimalist-academic-cover](../minimalist-academic-cover/SKILL.md) skill to generate a cover via NotebookLM infographic generation instead of extracting a video frame.
 
-```bash
-ffmpeg -y -i "output/video/video.mp4" -vframes 1 -q:v 2 "output/video/cover.jpg"
-```
+The cover skill will:
+1. Pass the design spec directly as a prompt to `notebooklm generate infographic --style editorial`
+2. Generate an infographic artifact
+3. Download the completed infographic to `input/cover.png`
 
-This creates `output/video/cover.jpg` from the first frame.
+This replaces the old `ffmpeg` frame-extraction with a professional minimalist academic design.
+
+**Design rules** (see full spec in the cover skill):
+- Solid color background (deep navy #1a1a2e)
+- Large bold centered title (sans-serif, dead center)
+- Light subtitle at ¼–⅕ title size below
+- No logos, dates, author names, or decoration
 
 ### Step 7: Report
 

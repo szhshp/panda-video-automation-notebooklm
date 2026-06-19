@@ -70,7 +70,31 @@ Copy the source video to `output/video/video.mp4`:
 cp "<source-path>" "output/video/video.mp4"
 ```
 
-### Step 6: Generate Minimalist Academic Cover
+### Step 6: Trim Last 3 Seconds
+
+NotebookLM-generated videos often include an ending bumper/logo frame. Trim the last 3 seconds from the video before upload using ffmpeg:
+
+```bash
+# Get video duration in seconds
+DURATION=$(ffprobe -v error -show_entries format=duration \
+  -of default=noprint_wrappers=1:nokey=1 "output/video/video.mp4")
+
+# Calculate new duration (minus 3 seconds)
+TRIM_TO=$(echo "$DURATION - 3" | bc)
+
+# Cut video to new duration (fast — stream copy, no re-encode)
+ffmpeg -i "output/video/video.mp4" -t "$TRIM_TO" -c copy \
+  "output/video/video-trimmed.mp4"
+
+# Replace original with trimmed version
+mv "output/video/video-trimmed.mp4" "output/video/video.mp4"
+
+echo "Trimmed last 3s: ${DURATION}s → ${TRIM_TO}s"
+```
+
+> **Requires `ffmpeg` and `ffprobe`.** Install via `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux).
+
+### Step 7: Generate Minimalist Academic Cover
 
 Use the [minimalist-academic-cover](../minimalist-academic-cover/SKILL.md) skill to generate a cover via NotebookLM infographic generation instead of extracting a video frame.
 
@@ -87,7 +111,7 @@ This replaces the old `ffmpeg` frame-extraction with a professional minimalist a
 - Light subtitle at ¼–⅕ title size below
 - No logos, dates, author names, or decoration
 
-### Step 7: Report
+### Step 8: Report
 
 Tell the user:
 - ✅ `output/video/video.mp4` is ready

@@ -42,12 +42,16 @@ wait
 ### Parallel Upload
 
 ```bash
-TITLE=$(cat /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm/input/title.json | jq -r .title)
+VIDEO="$(pwd)/input/video.mp4"
+COVER="$(pwd)/input/cover.png"
+TITLE=$(cat input/title.json | jq -r .title)
+TAGS=$(cat input/tags.json | jq -r '.tags | join(",")')
+DESC=$(cat input/description.md)
 
-pva bilibili upload --video /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm/input/video.mp4 --title "$TITLE" &
-pva douyin  upload --video /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm/input/video.mp4 --title "$TITLE" &
-pva kuaishou upload --video /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm/input/video.mp4 --title "$TITLE" &
-pva weixin  upload --video /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm/input/video.mp4 --title "$TITLE" &
+node_modules/.bin/pva bilibili upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
+node_modules/.bin/pva douyin  upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
+node_modules/.bin/pva kuaishou upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
+node_modules/.bin/pva weixin  upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
 
 wait
 ```
@@ -67,6 +71,50 @@ wait
 - Saved auth state is in `~/.local/share/mise/installs/node/22/lib/node_modules/@panda-video-automation/pva/playwright/.auth/`.
 - Login only needs to be done once; subsequent uploads reuse saved sessions.
 - `pva --help` for full CLI reference.
+
+## 🚨 Pitfalls & Solutions
+
+### 1. `pva` command not found
+
+If running in a local install (not global), the `pva` binary is at `node_modules/.bin/pva`. Do NOT rely on `pva` being in PATH — always use the full relative path:
+
+```bash
+node_modules/.bin/pva bilibili upload ...
+# NOT: pva bilibili upload
+```
+
+You can also use `npx`:
+```bash
+npx --no-install pva bilibili upload ...
+```
+
+### 2. Video/cover file path MUST be absolute
+
+The `pva` CLI internally runs Playwright tests with `cwd: PROJECT_ROOT` (the npm package directory, e.g. `node_modules/@panda-video-automation/pva/`), NOT the project root. Relative paths like `input/video.mp4` or `./input/video.mp4` will fail because Playwright checks `existsSync()` from the wrong CWD.
+
+**Always use absolute paths** for `--video` and `--cover`:
+
+```bash
+# ❌ Wrong — "Video file not found"
+pva bilibili upload --video input/video.mp4 ...
+
+# ✅ Correct — use absolute path
+pva bilibili upload --video /path/to/project/input/video.mp4 ...
+
+# ✅ Best — resolve in a bash variable
+VIDEO="$(pwd)/input/video.mp4"
+COVER="$(pwd)/input/cover.png"
+pva bilibili upload --video "$VIDEO" --cover "$COVER" ...
+```
+
+### 3. Description with special characters / multi-line text
+
+The `--desc` argument supports multi-line text, but shell escaping can be tricky with Chinese characters and newlines. Prefer reading from file into a variable:
+
+```bash
+DESC=$(cat input/description.md)
+pva bilibili upload --desc "$DESC" ...
+```
 
 ## Behavioral Rules
 

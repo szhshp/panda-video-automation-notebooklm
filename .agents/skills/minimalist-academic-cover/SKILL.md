@@ -100,10 +100,10 @@ img.save('input/cover.png')
 
 **Adjust font sizes** by changing `ImageFont.truetype()` arguments (title 130, subtitle 86 recommended). **Adjust vertical spacing** by changing `gap_1_2`, `gap_2_3`, `gap_cap`. **If caption fits in one line**, omit `cap2` and adjust total_height accordingly.
 
-### Step 3: Copy to Standard Path
+### Step 3: Copy to Output Path
 
 ```bash
-cp input/cover.png docs/assets/cover.png
+cp input/cover.png output/video/cover.png
 ```
 
 ### Step 4: Verify Output

@@ -1,7 +1,0 @@
-node_modules/
-.DS_Store
-.claude/
-input/
-output/
-*.mp4
-v2ex-post.md

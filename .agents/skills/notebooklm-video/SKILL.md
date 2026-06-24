@@ -1,11 +1,11 @@
 ---
 name: notebooklm-video
-description: Create a NotebookLM notebook for a topic and generate a video overview in Chinese. Delegates installation and login checks to notebooklm-research skill.
+description: Create a NotebookLM notebook for a topic and generate a video overview in Simplified Chinese. Delegates installation and login checks to notebooklm-research skill.
 ---
 
 # NotebookLM Video Workflow
 
-Research a topic using NotebookLM and generate a Chinese-language video overview.
+Research a topic using NotebookLM and generate a video overview in Simplified Chinese.
 
 ## Workflow Steps
 
@@ -39,7 +39,7 @@ Wait for the user to provide the research title/topic.
 1. Ask the user to confirm whether they want to proceed with video generation.
 2. If confirmed, generate a video overview in Simplified Chinese (no wait — runs in background):
    ```bash
-   notebooklm generate video "<research-title>视频概览" --language zh_Hans --format explainer --style auto --no-wait --json
+   notebooklm generate video "<research-title> video overview" --language zh_Hans --format explainer --style auto --no-wait --json
    ```
 3. Report the results to the user with the video ID.
 4. Tell the user the video is being generated in the background — check back in about 5 minutes.
@@ -52,7 +52,7 @@ User: `/notebooklm-video`
 Agent:
 1. ✅ Runs notebooklm-research skill for prerequisites
 2. ❓ Asks: "What research topic would you like to explore?"
-3. User: "AI泡沫还能持续多久？"
+3. User: "How much longer can the AI bubble last?"
 4. ✅ Creates notebook and sets context
-5. ✅ Generates Chinese video overview
+5. ✅ Generates video overview in Simplified Chinese
 6. Reports back with notebook ID and video info

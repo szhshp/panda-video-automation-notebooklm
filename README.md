@@ -2,7 +2,7 @@
   <img src="./docs/assets/panda-notebooklm.png" width="200" alt="Panda Video NotebookLM Logo">
   
   # Panda Video Automation - NotebookLM Integration
-  
+
   **熊猫视频自动化生态下的 NotebookLM 笔记转视频自动化工具集**
 
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -34,22 +34,20 @@
   - [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher)
 
 ## ✨ 核心特性
-<!-- TODO -->
 
-<!-- GitHub.com strips most flex/gap inline styles; use a plain row table so 3 columns match on the website. -->
 <table cellspacing="20" cellpadding="0" border="0">
   <tr valign="top">
     <td width="34%" valign="top">
       <h3>📝 <mark>一键</mark> NotebookLM 研究</h3>
-      <p>一键创建笔记本, Web 研究, 导入来源, 自动完成 NotebookLM 研究流程. </p>
+      <p>使用 <code>notebooklm-pipeline</code> 技能一站式完成: 创建笔记本, 深度研究, 导入来源, 自动完成 NotebookLM 研究流程. </p>
     </td>
     <td width="33%" valign="top">
       <h3>🎬 <mark>一键</mark>视频生成</h3>
-      <p>一键从 NotebookLM 笔记本导出视频制品 (Deep Dive 对话 / 音频概览) , 自动下载并准备上传. </p>
+      <p>从 NotebookLM 笔记本一键导出视频制品, 自动下载并准备上传. 全程无需手动操作. </p>
     </td>
     <td width="33%" valign="top">
       <h3>🚀 <mark>一键</mark>多平台发布</h3>
-      <p>一键驱动浏览器自动化上传; B 站, 抖音, 微信视频号, 小红书等共用相近流程. </p>
+      <p>驱动浏览器自动化上传; B 站, 抖音, 微信视频号, 快手等主流平台全支持. </p>
     </td>
   </tr>
 </table>
@@ -59,25 +57,23 @@
 <table cellspacing="20" cellpadding="0" border="0">
   <tr valign="top">
     <td width="100%" valign="top">
-      <h3>🤖 Agent Skills 方式</h3>
+      <h3>🤖 Agent Skills 方式 (推荐) </h3>
       <ul>
-        <li>在 AI Agent 中直接运行技能, 编排 NotebookLM 视频生成流程. </li>
-        <li>支持研究, 视频下载, 多平台上传等技能. </li>
-        <li>支持 Cursor, Claude Code, Copilot 等常用 AI Agent. </li>
+        <li>在 AI Agent 中执行 <code>notebooklm-pipeline</code> 技能, 一行指令完成全流程. </li>
+        <li>支持 Claude Code, Cursor, Copilot 等常用 AI Agent. </li>
+        <li>首次运行 <code>/setup-pva-notebooklm</code> 技能可自动完成依赖检查和安装. </li>
       </ul>
-      <p>无需手动安装 CLI, 首次运行 <code>/setup-pva-notebooklm</code> 技能即可自动完成依赖检查和安装. </p>
     </td>
   </tr>
 </table>
 
 ---
-<!-- TODO -->
 
 ## 📖 简介
 
-把 NotebookLM 里的研究成果一键变成视频，再自动发到 B 站、抖音、视频号——这就是 **Panda Video — NotebookLM**。
+把 NotebookLM 里的研究成果一键变成视频, 再自动发到 B 站, 抖音, 视频号——这就是 **Panda Video — NotebookLM**. 
 
-它脱胎于 [Panda Video Generator](https://github.com/szhshp/panda-video-generator) 的视频生产流水线，上传模块来自 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher)。从创建笔记本、做研究、导出视频，到多平台发布，一条命令全搞定。不用手动下载、不用反复登录、不用逐个平台传。
+它脱胎于 [Panda Video Generator](https://github.com/szhshp/panda-video-generator) 的视频生产流水线, 上传模块来自 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher). 从创建笔记本, 做研究, 导出视频, 到多平台发布, **一条指令全搞定**. 不用手动下载, 不用反复登录, 不用逐个平台传. 
 
 ---
 
@@ -94,24 +90,34 @@
 
 ## 🚀 快速开始
 
+向 Agent 发送以下指令即可完成完整的工作流:
 
-向 Agent (一次性或分步) 发送以下文本:
+### 一站式流程 (推荐) 
 
-1. `/setup-pva-notebooklm` 检查并安装所有前置依赖
-2. `/notebooklm-status` 检查我的登录状态
-3. `/notebooklm-research` 创建一个 NotebookLM 笔记本并执行深度研究, 研究主题是 "AI 泡沫还能持续多久? "
-4. (5 分钟后) `/notebooklm-video` 从笔记本生成一个视频
-6. (15 分钟后) `/notebooklm-status` 查看笔记本和视频制品状态, 确认视频已生成并下载到本地
-6. 使用 `pva CLI` 登录特定平台并上传视频, 我需要登录到 B 站和抖音 (如果不久前已登录过, 则跳过登录步骤)
-7. 帮我批量发布到 B 站和抖音
+```text
+/notebooklm-pipeline 帮我做一个关于「AI 泡沫还能持续多久?」的视频并发布到 B 站和抖音
+```
 
+Agent 会自动执行: 深度研究 → 视频生成 → 裁剪 → 封面 → 元数据 → 发布, 全程无需人工干预. 
+
+### 初次使用
+
+如果首次使用, 先运行:
+
+```text
+/setup-pva-notebooklm
+```
+
+这会自动安装 `notebooklm-py` , `@panda-video-automation/pva` 等所有依赖, 并引导完成 NotebookLM 登录. 
 
 ### 先决条件
 
-- **Python 3** 
+- **Python 3**
   — [notebooklm-py](https://pypi.org/project/notebooklm-py/)
 - **Node.js 20+**
   — [@panda-video-automation/pva](https://www.npmjs.com/package/@panda-video-automation/pva)
+- **ffmpeg**
+  — 视频裁剪 ( `brew install ffmpeg` / `apt install ffmpeg` ) 
 
 ---
 
@@ -119,18 +125,24 @@
 
 | 技能 | 说明 |
 |------|------|
-| `setup-pva-notebooklm` | 检查所有前置依赖 (Python, Node.js, notebooklm-py, PVA) |
-| `setup-pva-notebooklm` | 安装 @panda-video-automation/pva |
+| `notebooklm-pipeline` | **[入口]** 全流程一站式: 研究 → 视频 → 裁剪 → 封面 → 元数据 → 发布 |
+| `setup-pva-notebooklm` | 检查并安装所有前置依赖 (Python, Node.js, notebooklm-py, PVA) |
 | `notebooklm-status` | 查看所有笔记本及制品状态 |
-| `notebooklm-research` | 创建笔记本并执行深度研究 |
-| `notebooklm-prep-upload` | 准备上传内容到 NotebookLM |
-| `notebooklm-video` | 从笔记本生成视频 |
+| `notebooklm-research` | 创建笔记本并执行深度研究 (子步骤) |
+| `notebooklm-video` | 从笔记本生成视频 (子步骤) |
+| `get-notebooklm-video` | 下载视频制品 (子步骤) |
+| `notebooklm-prep-upload` | 准备上传内容到 input/ 文件夹 (子步骤) |
+| `minimalist-academic-cover` | 生成极简学术风格封面 (子步骤) |
+| `pva-publisher` | 跨平台视频上传 (子步骤) |
+
+> 提示: 大多数场景下只需使用 `notebooklm-pipeline` 一个技能即可完成全部工作. 其他技能适用于需要手动控制其中某个环节的场景. 
+
 
 ---
 
 ## 🤝 贡献
 
-欢迎提交 Issue 和 Pull Request! 
+欢迎提交 Issue 和 Pull Request!
 
 ---
 

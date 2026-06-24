@@ -38,10 +38,10 @@ notebooklm source add-research "<query>" --mode deep --no-wait
 
 ### Step 2: Generate Video
 
-Generates a Chinese-language video overview from the notebook.
+Generates a video overview in Simplified Chinese from the notebook.
 
 ```bash
-notebooklm generate video "<title>视频概览" --language zh_Hans --format explainer --style auto --no-wait --json
+notebooklm generate video "<title> video overview" --language zh_Hans --format explainer --style auto --no-wait --json
 ```
 
 **Wait ~5 min** — check back and download the video via `/get-notebooklm-video`.

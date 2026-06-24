@@ -39,7 +39,21 @@ pva kuaishou login &
 wait
 ```
 
-### Parallel Upload
+### Parallel Upload (one-liner, all 4 platforms)
+
+```bash
+V="$(pwd)/input/video.mp4" && C="$(pwd)/input/cover.png" \
+  && T="$(cat input/title.json | jq -r .title)" \
+  && G="$(cat input/tags.json | jq -r '.tags | join(",")')" \
+  && D="$(cat input/description.md)" \
+  && node_modules/.bin/pva bilibili upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva douyin  upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva kuaishou upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva weixin  upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & wait
+```
+
+### Parallel Multi-line (easier to read)
 
 ```bash
 VIDEO="$(pwd)/input/video.mp4"

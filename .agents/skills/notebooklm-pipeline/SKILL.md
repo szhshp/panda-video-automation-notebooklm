@@ -24,14 +24,14 @@ Research → Video → Download+Trim
 3. Create notebook and start deep web research (`notebooklm source add-research "<topic>" --mode deep --no-wait`)
 4. Tell user ~5 min, come back later
 5. When user returns: check status, import all sources (`notebooklm research wait --import-all -n <id>`)
-6. Generate summary via `notebooklm ask "请用中文概述这个 Notebook 的核心内容和主要发现" -n <id>`
+6. Generate summary via `notebooklm ask "Summarize the core content and key findings of this notebook in Chinese" -n <id>`
 
 ## Step 2: Generate Video
 
-Generate Chinese video overview (no wait):
+Generate video overview in Simplified Chinese (no wait):
 
 ```bash
-notebooklm generate video "<topic>视频概览" --language zh_Hans --format explainer --style auto --no-wait --json -n <notebook-id>
+notebooklm generate video "<topic> video overview" --language zh_Hans --format explainer --style auto --no-wait --json -n <notebook-id>
 ```
 
 Report task ID to user. Tell them ~5 min, come back to check.
@@ -187,12 +187,25 @@ cp input/cover.png output/video/cover.png
 Upload to desired platform(s) via PVA CLI:
 
 ```bash
-npx pva weixin login    # one-time login
-npx pva weixin upload   # upload to Weixin Video
-# or: npx pva bilibili upload
-# or: npx pva douyin upload
-# etc.
+# One-time login per platform
+npx pva weixin login
+npx pva bilibili login
+npx pva douyin login
+npx pva kuaishou login
+
+# Batch upload to all 4 platforms in parallel (single command)
+V="$(pwd)/input/video.mp4" && C="$(pwd)/input/cover.png" \
+  && T="$(cat input/title.json | jq -r .title)" \
+  && G="$(cat input/tags.json | jq -r '.tags | join(",")')" \
+  && D="$(cat input/description.md)" \
+  && node_modules/.bin/pva bilibili upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva douyin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva kuaishou upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & node_modules/.bin/pva weixin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+  & wait
 ```
+
+> This launches 4 browser instances in parallel, one per platform. Each runs independently without interference.
 
 ---
 

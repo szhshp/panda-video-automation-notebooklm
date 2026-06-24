@@ -115,7 +115,7 @@ When the user comes back to check:
 Ask NotebookLM to generate a general description/summary of the notebook content:
 
 ```bash
-notebooklm ask "请用中文概述这个 Notebook 的核心内容和主要发现" -n <notebook-id>
+notebooklm ask "Summarize the core content and key findings of this notebook in Chinese" -n <notebook-id>
 ```
 
 Present the generated summary to the user.

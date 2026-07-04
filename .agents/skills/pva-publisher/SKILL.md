@@ -42,33 +42,20 @@ wait
 ### Parallel Upload (one-liner, all 4 platforms)
 
 ```bash
+cd /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm
 V="$(pwd)/input/video.mp4" && C="$(pwd)/input/cover.png" \
-  && T="$(cat input/title.json | jq -r .title)" \
-  && G="$(cat input/tags.json | jq -r '.tags | join(",")')" \
-  && D="$(cat input/description.md)" \
-  && node_modules/.bin/pva bilibili upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva douyin  upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva kuaishou upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva weixin  upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & wait
-```
+  && T="$(jq -r .title input/title.json)" \
+  && G="$(jq -r '.tags | join(",")' input/tags.json)" \
+  && D="$(cat input/description.md)"
 
-### Parallel Multi-line (easier to read)
-
-```bash
-VIDEO="$(pwd)/input/video.mp4"
-COVER="$(pwd)/input/cover.png"
-TITLE=$(cat input/title.json | jq -r .title)
-TAGS=$(cat input/tags.json | jq -r '.tags | join(",")')
-DESC=$(cat input/description.md)
-
-node_modules/.bin/pva bilibili upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
-node_modules/.bin/pva douyin  upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
-node_modules/.bin/pva kuaishou upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
-node_modules/.bin/pva weixin  upload --video "$VIDEO" --title "$TITLE" --desc "$DESC" --tags "$TAGS" --cover "$COVER" &
-
+npx pva bilibili upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" &
+npx pva douyin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" &
+npx pva kuaishou upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" &
+npx pva weixin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" &
 wait
 ```
+
+> ✅ 这条命令已验证可用。直接用 `jq` 读文件（不用管道），`npx pva` 确保能找到命令，四平台后台并行跑，`wait` 等全部完成。
 
 ### All headed (default)
 

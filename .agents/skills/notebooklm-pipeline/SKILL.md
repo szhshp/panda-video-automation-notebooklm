@@ -1,6 +1,6 @@
 ---
 name: notebooklm-pipeline
-description: "[ENTRY POINT] Full NotebookLM pipeline — research → generate video → download → trim → generate meta files → cover → prepare upload → publish. Single entry point for all end-to-end video tasks."
+description: "[ENTRY POINT] Full NotebookLM pipeline — research → generate video → download → watermark → trim → generate meta files → cover → prepare upload → publish. Single entry point for all end-to-end video tasks."
 ---
 
 # NotebookLM Pipeline — Master Entry Point
@@ -10,7 +10,7 @@ This is the **single entry point** for the complete Panda Video Automation pipel
 ## Pipeline Overview
 
 ```
-Research → Video → Download+Trim
+Research → Video → Download → Watermark → Trim
 → Meta (title/desc/tags) → Cover
 → Prepare Upload → Publish
 ```
@@ -44,19 +44,28 @@ notebooklm artifact list -n <notebook-id> --json
 
 Proceed when status is `completed`.
 
-## Step 3: Download Video + Trim Last 3s
+## Step 3: Download → Add Watermark → Trim Last 3s
+
+### 3a. Download Video
 
 ```bash
-# 1. Download
 notebooklm download video -n <notebook-id> input/video.mp4 --force
+```
 
-# 2. Get video title from artifact list
-# Parse artifact title from JSON output
+### 3b. Add Watermark
 
-# 3. Create title.json
-echo '{"title": "<video-title>"}' > input/title.json
+Apply `input/watermark.png` to the bottom-right corner of the video (1280×720).
 
-# 4. Trim last 3 seconds (remove NotebookLM bumper)
+```bash
+ffmpeg -i input/video.mp4 -i input/watermark.png \
+  -filter_complex "overlay=1055:645" \
+  -codec:a copy input/video-watermarked.mp4 -y
+mv input/video-watermarked.mp4 input/video.mp4
+```
+
+### 3c. Trim Last 3 Seconds (remove NotebookLM bumper)
+
+```bash
 DURATION=$(ffprobe -v error -show_entries format=duration \
   -of default=noprint_wrappers=1:nokey=1 "input/video.mp4")
 TRIM_TO=$(echo "$DURATION - 3" | bc)
@@ -215,7 +224,8 @@ After pipeline completes:
 
 ```
 input/
-├── video.mp4          (trimmed last 3s)
+├── video.mp4          (trimmed + watermark applied)
+├── watermark.png      (watermark source image)
 ├── title.json         (title metadata)
 ├── description.md     (≤3 topics)
 ├── tags.json          (≤3 tags)
@@ -238,7 +248,7 @@ output/
 **Agent — just do it, no unnecessary questions:**
 1. **Step 1** → Research (create, deep research, import, summarize)
 2. **Step 2** → Generate video (background, tell user ~5 min)
-3. **Step 3** → Download + trim
+3. **Step 3** → Download video → Add watermark → Trim last 3s
 4. **Step 4** → Generate meta files (titles, description, tags)
 5. **Step 5** → Generate cover
 6. **Step 6** → Prepare for upload
@@ -257,5 +267,6 @@ notebooklm artifact list -n <notebook-id> --json
 
 - **Non-Blocking:** All long-running ops use `--no-wait`. Never use `wait` commands in main conversation.
 - **No Unnecessary Confirmations:** Proceed directly unless genuinely ambiguous.
+- **Watermark Always:** Every downloaded video gets `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before trimming.
 - **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/`.
 - **Trim Always:** Every downloaded video gets last 3 seconds trimmed.

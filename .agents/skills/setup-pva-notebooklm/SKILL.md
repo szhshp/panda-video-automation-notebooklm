@@ -14,10 +14,10 @@ npm install -g @panda-video-automation/pva
 pva --version
 ```
 
-Also ensure `notebooklm-py` is installed:
+Also ensure `notebooklm-mcp-cli` is installed:
 ```bash
-pip install notebooklm-py
-notebooklm skill install
+pip install notebooklm-mcp-cli
+nlm skill install agents
 ```
 
 ## Pipeline Steps
@@ -29,19 +29,18 @@ Each step below resolves immediately (background work). Wait times are noted.
 Creates a NotebookLM notebook and starts deep web research.
 
 ```bash
-notebooklm create "<topic>" --json
-notebooklm use <notebook-id>
-notebooklm source add-research "<query>" --mode deep --no-wait
+nlm notebook create "<topic>" -j
+nlm research start "<query>" -m deep -n <notebook-id>
 ```
 
-**Wait ~5 min** — run `notebooklm research wait --import-all` to finish and auto-import all sources.
+**Wait ~5 min** — run `nlm research import <notebook-id>` to finish and auto-import all sources.
 
 ### Step 2: Generate Video
 
 Generates a video overview in Simplified Chinese from the notebook.
 
 ```bash
-notebooklm generate video "<title> video overview" --language zh_Hans --format explainer --style auto --no-wait --json
+nlm video create <notebook-id> --format explainer --style auto_select --language zh_Hans -y -j
 ```
 
 **Wait ~5 min** — check back and download the video via `/get-notebooklm-video`.

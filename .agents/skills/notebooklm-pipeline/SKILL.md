@@ -21,25 +21,25 @@ Research → Video → Download → Watermark → Trim
 
 1. Check NotebookLM installation & login
 2. Ask user for research topic
-3. Create notebook and start deep web research (`notebooklm source add-research "<topic>" --mode deep --no-wait`)
+3. Create notebook and start deep web research (`nlm research start "<topic>" -m deep -n <notebook-id>`)
 4. Tell user ~5 min, come back later
-5. When user returns: check status, import all sources (`notebooklm research wait --import-all -n <id>`)
-6. Generate summary via `notebooklm ask "Summarize the core content and key findings of this notebook in Chinese" -n <id>`
+5. When user returns: check status, import all sources (`nlm research import <id>`)
+6. Generate summary via `nlm describe notebook <id>`
 
 ## Step 2: Generate Video
 
-Generate video overview in Simplified Chinese (no wait):
+Generate video overview in Simplified Chinese:
 
 ```bash
-notebooklm generate video "<topic> video overview" --language zh_Hans --format explainer --style auto --no-wait --json -n <notebook-id>
+nlm video create <notebook-id> --format explainer --style auto_select --language zh_Hans -y -j
 ```
 
-Report task ID to user. Tell them ~5 min, come back to check.
+Report artifact info to user. Tell them ~5 min, come back to check.
 
 **Check status:**
 
 ```bash
-notebooklm artifact list -n <notebook-id> --json
+nlm studio status <notebook-id> -j
 ```
 
 Proceed when status is `completed`.
@@ -49,7 +49,7 @@ Proceed when status is `completed`.
 ### 3a. Download Video
 
 ```bash
-notebooklm download video -n <notebook-id> input/video.mp4 --force
+nlm download video <notebook-id> -o input/video.mp4
 ```
 
 ### 3b. Add Watermark
@@ -258,14 +258,14 @@ output/
 
 **Agent:**
 ```bash
-notebooklm artifact list -n <notebook-id> --json
+nlm studio status <notebook-id> -j
 ```
 
 ---
 
 ## Core Rules
 
-- **Non-Blocking:** All long-running ops use `--no-wait`. Never use `wait` commands in main conversation.
+- **Non-Blocking:** Launch operations and return immediately. Check status later with `nlm research status` / `nlm studio status`.
 - **No Unnecessary Confirmations:** Proceed directly unless genuinely ambiguous.
 - **Watermark Always:** Every downloaded video gets `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before trimming.
 - **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/`.

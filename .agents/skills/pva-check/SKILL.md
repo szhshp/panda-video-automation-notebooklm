@@ -1,6 +1,6 @@
 ---
 name: pva-check
-description: Check all prerequisites (Python, Node.js, notebooklm-py, PVA) before running any workflow.
+description: Check all prerequisites (Python, Node.js, notebooklm-mcp-cli, PVA) before running any workflow.
 ---
 
 # PVA Prerequisites Check
@@ -21,10 +21,10 @@ python3 --version
 node --version
 ```
 
-### Step 3: Check notebooklm-py
+### Step 3: Check notebooklm-mcp-cli
 
 ```bash
-notebooklm --version
+nlm --version
 ```
 
 ### Step 4: Check PVA CLI

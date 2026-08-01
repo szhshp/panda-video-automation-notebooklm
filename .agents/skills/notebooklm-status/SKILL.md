@@ -18,7 +18,7 @@ First, run the [notebooklm-research](.claude/skills/notebooklm-research/SKILL.md
 ### Step 2: List All Notebooks
 
 ```bash
-notebooklm list --json
+nlm notebook list -j
 ```
 
 Parse the JSON output to get all notebook IDs and titles.
@@ -28,7 +28,7 @@ Parse the JSON output to get all notebook IDs and titles.
 For each notebook, query its artifacts:
 
 ```bash
-notebooklm artifact list -n <notebook-id> --json
+nlm studio status <notebook-id> -j
 ```
 
 Collect all artifacts from all notebooks.

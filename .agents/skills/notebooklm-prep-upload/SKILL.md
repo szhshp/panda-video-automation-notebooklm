@@ -99,9 +99,9 @@ echo "Trimmed last 3s: ${DURATION}s → ${TRIM_TO}s"
 Use the [minimalist-academic-cover](../minimalist-academic-cover/SKILL.md) skill to generate a cover via NotebookLM infographic generation instead of extracting a video frame.
 
 The cover skill will:
-1. Pass the design spec directly as a prompt to `notebooklm generate infographic --style editorial`
-2. Generate an infographic artifact
-3. Download the completed infographic to `input/cover.png`
+1. Design a minimalist academic cover based on the video title
+2. Generate the cover using Python/Pillow
+3. Save the completed cover to `input/cover.png`
 
 This replaces the old `ffmpeg` frame-extraction with a professional minimalist academic design.
 

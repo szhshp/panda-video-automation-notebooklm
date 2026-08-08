@@ -33,13 +33,13 @@ Ask the user for:
 ### Step 2: Generate Engaging Title
 
 If the user didn't provide a title, infer the topic from the filename. Then generate an attractive, clickable title suitable for Bilibili/Douyin. Keep these constraints in mind:
-- **Douyin max 30 characters** (the upload script auto-truncates to 30)
-- **Bilibili max 80 characters**
+- **Short title ≤12 Chinese characters** — default/main title for all platforms
+- **Bilibili max 80 characters** — optional full version
 - The title should be engaging and attract clicks (e.g., use questions, surprising angles, or clear value propositions)
 
 Create **two versions** of the title:
-- A short version (≤30 chars) for Douyin
-- A full version (≤80 chars) for Bilibili
+- A short version (≤12 Chinese chars) — default, used as the main title
+- A full version (≤80 chars) — optional, for Bilibili
 
 If the user provided a title directly, skip generation and use their title directly.
 

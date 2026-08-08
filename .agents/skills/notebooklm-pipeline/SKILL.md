@@ -80,8 +80,10 @@ mv "input/video-trimmed.mp4" "input/video.mp4"
 ### 4a. Generate Engaging Title
 
 Create two title versions from the artifact title:
-- **Short version** (≤30 chars) — for Douyin
-- **Full version** (≤80 chars) — for Bilibili
+- **Short version** (≤12 Chinese chars) — default/main title for all platforms
+- **Full version** (≤80 chars) — optional for Bilibili
+
+> **Short title rule:** Always default to a punchy short title ≤12 Chinese characters. Use it as the main title in `title.json` and as the first line of `description.md`.
 
 Present both to user, let them confirm.
 
@@ -98,27 +100,29 @@ Format: first line = headline title, then ≤3 topic lines, each ≤50 character
 ```markdown
 <video-title>
 
-📊 Video highlights:
-① <topic-1, ≤50 chars>
-② <topic-2, ≤50 chars>
-③ <topic-3, ≤50 chars>
+📊 视频看点：
+1. <topic-1, ≤50 chars>
+2. <topic-2, ≤50 chars>
+3. <topic-3, ≤50 chars>
 ```
 
 ```bash
 cat > input/description.md << 'EOF'
 <video-title>
 
-📊 Video highlights:
-① <topic-1>
-② <topic-2>
-③ <topic-3>
+📊 视频看点：
+1. <topic-1>
+2. <topic-2>
+3. <topic-3>
 EOF
 ```
 
 **Constraints:**
 - First line is the headline title
-- At most **3 topics** (① ② ③)
+- All content must be **Simplified Chinese** — avoid English text in the description
+- At most **3 topics** (1. 2. 3.)
 - Each topic line ≤ **50 characters** — concise punchline, not full sentences
+- Use plain numbered list (`1.` `2.` `3.`), NOT circled numbers (① ② ③)
 - Total content should be informative and engaging
 
 **⚠️ When passing to PVA upload commands, use actual line breaks (multi-line string), NOT `\n` escape sequences. Shell treats `\n` as literal text, not newlines. Example:**
@@ -126,10 +130,10 @@ EOF
 ```bash
 VIDEO_DESC="<video-title>
 
-📊 Video highlights:
-① <topic-1>
-② <topic-2>
-③ <topic-3>" npx pva bilibili upload
+📊 视频看点：
+1. <topic-1>
+2. <topic-2>
+3. <topic-3>" npx pva bilibili upload
 ```
 
 ### 4d. Create tags.json

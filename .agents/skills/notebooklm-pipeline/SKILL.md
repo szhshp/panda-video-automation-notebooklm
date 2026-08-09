@@ -79,18 +79,18 @@ mv "input/video-trimmed.mp4" "input/video.mp4"
 
 ### 4a. Generate Engaging Title
 
-Create two title versions from the artifact title:
-- **Short version** (≤12 Chinese chars) — default/main title for all platforms
-- **Full version** (≤80 chars) — optional for Bilibili
+Generate a title directly from the artifact title — **do NOT ask the user to confirm or choose**. Decide it yourself and use it immediately.
 
-> **Short title rule:** Always default to a punchy short title ≤12 Chinese characters. Use it as the main title in `title.json` and as the first line of `description.md`.
+- **Fixed short title rule:** Always use a short title ≤12 Chinese characters as the main title for all platforms. Never present alternatives or ask the user to pick.
+- **Simple & clear:** Title must be easy to understand at a glance — plain everyday words, the core event/point named directly, no jargon, no clever ambiguity.
+- **Full version** (≤80 chars) — optional for Bilibili; only used if platform needs a longer title, still decided directly, no user confirmation.
 
-Present both to user, let them confirm.
+The decided short title goes into `title.json` and as the first line of `description.md`.
 
 ### 4b. Create title.json
 
 ```bash
-echo '{"title": "<confirmed-title>"}' > input/title.json
+echo '{"title": "<decided-short-title>"}' > input/title.json
 ```
 
 ### 4c. Create description.md
@@ -100,7 +100,7 @@ Format: first line = headline title, then ≤3 topic lines, each ≤50 character
 ```markdown
 <video-title>
 
-📊 视频看点：
+视频看点：
 1. <topic-1, ≤50 chars>
 2. <topic-2, ≤50 chars>
 3. <topic-3, ≤50 chars>
@@ -110,7 +110,7 @@ Format: first line = headline title, then ≤3 topic lines, each ≤50 character
 cat > input/description.md << 'EOF'
 <video-title>
 
-📊 视频看点：
+视频看点：
 1. <topic-1>
 2. <topic-2>
 3. <topic-3>
@@ -120,6 +120,7 @@ EOF
 **Constraints:**
 - First line is the headline title
 - All content must be **Simplified Chinese** — avoid English text in the description
+- **No emoji anywhere** — no 📊, no symbols, no emoticons in the description text. Plain text only.
 - At most **3 topics** (1. 2. 3.)
 - Each topic line ≤ **50 characters** — concise punchline, not full sentences
 - Use plain numbered list (`1.` `2.` `3.`), NOT circled numbers (① ② ③)
@@ -130,7 +131,7 @@ EOF
 ```bash
 VIDEO_DESC="<video-title>
 
-📊 视频看点：
+视频看点：
 1. <topic-1>
 2. <topic-2>
 3. <topic-3>" npx pva bilibili upload

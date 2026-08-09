@@ -27,23 +27,20 @@ output/
 Ask the user for:
 1. **Source video path** — where the downloaded video is located
 2. **Video topic or title** (optional) — if the user doesn't provide one, infer the topic from the filename automatically
-3. **Description** (optional) — will be set as `VIDEO_DESC` env var. Constraints: first line must be a headline title, at most **3 topics**, each line ≤ **200 characters** total.
+3. **Description** (optional) — will be set as `VIDEO_DESC` env var. Constraints: first line must be a headline title, at most **3 topics**, each line ≤ **200 characters** total, **no emoji anywhere** (plain text only, no symbols or emoticons).
 4. **Tags** (optional, comma-separated, **max 3**) — will be set as `VIDEO_TAGS` env var. Most platforms (e.g. Bilibili) limit tags to 3. Pick the most relevant ones.
 
 ### Step 2: Generate Engaging Title
 
-If the user didn't provide a title, infer the topic from the filename. Then generate an attractive, clickable title suitable for Bilibili/Douyin. Keep these constraints in mind:
-- **Short title ≤12 Chinese characters** — default/main title for all platforms
-- **Bilibili max 80 characters** — optional full version
+If the user didn't provide a title, infer the topic from the filename. Then generate an attractive, clickable title suitable for Bilibili/Douyin. **Decide the title directly — do NOT ask the user to confirm or choose.** Keep these constraints in mind:
+- **Fixed short title ≤12 Chinese characters** — always the main title, no user confirmation
+- **Simple & clear** — plain everyday words, core event named directly, easy to understand at a glance
+- **Bilibili max 80 characters** — optional full version, decided directly, no confirmation
 - The title should be engaging and attract clicks (e.g., use questions, surprising angles, or clear value propositions)
-
-Create **two versions** of the title:
-- A short version (≤12 Chinese chars) — default, used as the main title
-- A full version (≤80 chars) — optional, for Bilibili
 
 If the user provided a title directly, skip generation and use their title directly.
 
-Present both title versions to the user and let them confirm or request adjustments before proceeding.
+No confirmation step — proceed straight to writing files with the decided short title.
 
 ### Step 3: Create Directories
 
@@ -53,7 +50,7 @@ mkdir -p output/video output/spider
 
 ### Step 4: Create Title JSON
 
-Write a `output/spider/title.json` file with the user-confirmed title:
+Write a `output/spider/title.json` file with the decided short title:
 ```json
 {
   "title": "<generated-title>"

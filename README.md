@@ -108,12 +108,12 @@ Agent 会自动执行: 深度研究 → 视频生成 → 裁剪 → 封面 → �
 /setup-pva-notebooklm
 ```
 
-这会自动安装 `notebooklm-py` , `@panda-video-automation/pva` 等所有依赖, 并引导完成 NotebookLM 登录. 
+这会自动安装 `notebooklm-mcp-cli` , `@panda-video-automation/pva` 等所有依赖, 并引导完成 NotebookLM 登录. 
 
 ### 先决条件
 
 - **Python 3**
-  — [notebooklm-py](https://pypi.org/project/notebooklm-py/)
+  — [notebooklm-mcp-cli](https://pypi.org/project/notebooklm-mcp-cli/)
 - **Node.js 20+**
   — [@panda-video-automation/pva](https://www.npmjs.com/package/@panda-video-automation/pva)
 - **ffmpeg**
@@ -126,8 +126,9 @@ Agent 会自动执行: 深度研究 → 视频生成 → 裁剪 → 封面 → �
 | 技能 | 说明 |
 |------|------|
 | `notebooklm-pipeline` | **[入口]** 全流程一站式: 研究 → 视频 → 裁剪 → 封面 → 元数据 → 发布 |
-| `setup-pva-notebooklm` | 检查并安装所有前置依赖 (Python, Node.js, notebooklm-py, PVA) |
+| `setup-pva-notebooklm` | 检查并安装所有前置依赖 (Python, Node.js, notebooklm-mcp-cli, PVA) |
 | `notebooklm-status` | 查看所有笔记本及制品状态 |
+| `pipeline-status` | 报告流水线进度 ✅/⚠️ 清单 (响应 "status" / "check progress") |
 | `notebooklm-research` | 创建笔记本并执行深度研究 (子步骤) |
 | `notebooklm-video` | 从笔记本生成视频 (子步骤) |
 | `get-notebooklm-video` | 下载视频制品 (子步骤) |

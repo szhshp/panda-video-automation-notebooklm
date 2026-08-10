@@ -9,16 +9,21 @@ This project automates the full pipeline: research a topic via NotebookLM → ge
 
 ## Prerequisite: Setup
 
+PVA is installed as a **local project dependency** (declared in `package.json`). Run inside the project root:
+
 ```bash
-npm install -g @panda-video-automation/pva
-pva --version
+npm install
+npx pva version
 ```
+
+> **Note:** PVA is used from the **local project directory** (`node_modules/.bin/pva` or `npx pva`) — never installed globally. Bare `pva` is not on PATH.
 
 Also ensure `notebooklm-mcp-cli` is installed:
 ```bash
-pip install notebooklm-mcp-cli
-nlm skill install agents
+uv tool install notebooklm-mcp-cli   # or: pip install notebooklm-mcp-cli
 ```
+
+> **Note (optional):** `nlm skill install agents` is **optional** — only needed if you want nlm to emit agent-style skill files. The project's own `.agents/skills/` already covers the pipeline; skip unless explicitly requested.
 
 ## Pipeline Steps
 

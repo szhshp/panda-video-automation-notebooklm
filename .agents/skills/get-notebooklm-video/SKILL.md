@@ -36,17 +36,17 @@ Options:
 echo '{"title": "<video-title>"}' > /input/title.json
 ```
 
-### Step 4: Trim Last 3 Seconds
+### Step 4: Trim Last 4 Seconds
 
-NotebookLM-generated videos often include an ending bumper/logo frame. Trim the last 3 seconds from the video to clean it up:
+NotebookLM-generated videos often include an ending bumper/logo frame. Trim the last 4 seconds from the video to clean it up:
 
 ```bash
 # Get video duration in seconds
 DURATION=$(ffprobe -v error -show_entries format=duration \
   -of default=noprint_wrappers=1:nokey=1 "input/video.mp4")
 
-# Calculate new duration (minus 3 seconds)
-TRIM_TO=$(echo "$DURATION - 3" | bc)
+# Calculate new duration (minus 4 seconds)
+TRIM_TO=$(echo "$DURATION - 4" | bc)
 
 # Cut video to new duration (fast — stream copy, no re-encode)
 ffmpeg -i "input/video.mp4" -t "$TRIM_TO" -c copy \
@@ -55,7 +55,7 @@ ffmpeg -i "input/video.mp4" -t "$TRIM_TO" -c copy \
 # Replace original with trimmed version
 mv "input/video-trimmed.mp4" "input/video.mp4"
 
-echo "Trimmed last 3s: ${DURATION}s → ${TRIM_TO}s"
+echo "Trimmed last 4s: ${DURATION}s → ${TRIM_TO}s"
 ```
 
 > **Requires `ffmpeg` and `ffprobe`.** Install via `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux).
@@ -64,6 +64,6 @@ echo "Trimmed last 3s: ${DURATION}s → ${TRIM_TO}s"
 
 ```
 input/
-├── video.mp4      (typically ~50-100MB, last 3s trimmed)
+├── video.mp4      (typically ~50-100MB, last 4s trimmed)
 └── title.json
 ```

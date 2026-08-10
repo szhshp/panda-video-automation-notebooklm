@@ -13,7 +13,7 @@ When this skill is invoked, follow these steps in order:
 
 ### Step 1: Prerequisites
 
-First, run the [notebooklm-research](.claude/skills/notebooklm-research/SKILL.md) skill to handle installation check, login verification, and setup.
+First, run the [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) skill to handle installation check, login verification, and setup.
 
 ### Step 2: Ask for Research Topic
 

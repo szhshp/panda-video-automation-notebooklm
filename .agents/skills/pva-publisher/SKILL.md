@@ -11,11 +11,11 @@ Cross-platform video upload using the `pva` CLI tool.
 
 | Platform | Alias | Login | Upload |
 |----------|-------|-------|--------|
-| Bilibili | `bilibili` | `pva bilibili login` | `pva bilibili upload` |
-| Douyin | `douyin` | `pva douyin login` | `pva douyin upload` |
-| Kuaishou | `kuaishou` | `pva kuaishou login` | `pva kuaishou upload` |
-| Weixin Video | `weixin` / `wechat` / `weixinvideo` | `pva weixin login` | `pva weixin upload` |
-| YouTube | `youtube` / `yt` | `pva youtube login` | `pva youtube upload` |
+| Bilibili | `bilibili` | `npx pva bilibili login` | `npx pva bilibili upload` |
+| Douyin | `douyin` | `npx pva douyin login` | `npx pva douyin upload` |
+| Kuaishou | `kuaishou` | `npx pva kuaishou login` | `npx pva kuaishou upload` |
+| Weixin Video | `weixin` / `wechat` / `weixinvideo` | `npx pva weixin login` | `npx pva weixin upload` |
+| YouTube | `youtube` / `yt` | `npx pva youtube login` | `npx pva youtube upload` |
 
 ## Upload Options
 
@@ -34,15 +34,15 @@ Login and upload tasks can run multiple platforms concurrently using shell backg
 ### Parallel Login
 
 ```bash
-pva douyin login &
-pva kuaishou login &
+npx pva douyin login &
+npx pva kuaishou login &
 wait
 ```
 
-### Parallel Upload (one-liner, all 4 platforms)
+### Parallel Upload Example
 
 ```bash
-cd /Users/Zill/Documents/Dev/Github/panda-video-automation-notebooklm
+cd /{PROJECT_ROOT}/panda-video-automation-notebooklm
 V="$(pwd)/input/video.mp4" && C="$(pwd)/input/cover.png" \
   && T="$(jq -r .title input/title.json)" \
   && G="$(jq -r '.tags | join(",")' input/tags.json)" \
@@ -60,8 +60,8 @@ wait
 ### All headed (default)
 
 ```bash
-pva douyin upload --video ./video.mp4 --title "Title" &
-pva kuaishou upload --video ./video.mp4 --title "Title" &
+npx pva douyin upload --video ./video.mp4 --title "Title" &
+npx pva kuaishou upload --video ./video.mp4 --title "Title" &
 wait
 ```
 
@@ -69,15 +69,15 @@ wait
 
 - **Always use headed mode** (visible browser). Never use `--headless` for uploads.
 - Each `pva` process launches its own Playwright browser instance — no conflict between platforms.
-- Saved auth state is in `~/.local/share/mise/installs/node/22/lib/node_modules/@panda-video-automation/pva/playwright/.auth/`.
+- Saved auth state is in `node_modules/@panda-video-automation/pva/playwright/.auth/` (local project dependency).
 - Login only needs to be done once; subsequent uploads reuse saved sessions.
-- `pva --help` for full CLI reference.
+- `npx pva --help` for full CLI reference.
 
 ## 🚨 Pitfalls & Solutions
 
 ### 1. `pva` command not found
 
-If running in a local install (not global), the `pva` binary is at `node_modules/.bin/pva`. Do NOT rely on `pva` being in PATH — always use the full relative path:
+PVA is a **local project dependency** (never global). The binary lives at `node_modules/.bin/pva` and is not on PATH — always invoke it via the local path or `npx`:
 
 ```bash
 node_modules/.bin/pva bilibili upload ...
@@ -97,15 +97,15 @@ The `pva` CLI internally runs Playwright tests with `cwd: PROJECT_ROOT` (the npm
 
 ```bash
 # ❌ Wrong — "Video file not found"
-pva bilibili upload --video input/video.mp4 ...
+npx pva bilibili upload --video input/video.mp4 ...
 
 # ✅ Correct — use absolute path
-pva bilibili upload --video /path/to/project/input/video.mp4 ...
+npx pva bilibili upload --video /path/to/project/input/video.mp4 ...
 
 # ✅ Best — resolve in a bash variable
 VIDEO="$(pwd)/input/video.mp4"
 COVER="$(pwd)/input/cover.png"
-pva bilibili upload --video "$VIDEO" --cover "$COVER" ...
+npx pva bilibili upload --video "$VIDEO" --cover "$COVER" ...
 ```
 
 ### 3. Description with special characters / multi-line text
@@ -114,7 +114,7 @@ The `--desc` argument supports multi-line text, but shell escaping can be tricky
 
 ```bash
 DESC=$(cat input/description.md)
-pva bilibili upload --desc "$DESC" ...
+npx pva bilibili upload --desc "$DESC" ...
 ```
 
 ## Behavioral Rules

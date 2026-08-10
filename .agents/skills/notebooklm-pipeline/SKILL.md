@@ -44,7 +44,7 @@ nlm studio status <notebook-id> -j
 
 Proceed when status is `completed`.
 
-## Step 3: Download → Add Watermark → Trim Last 3s
+## Step 3: Download → Add Watermark → Trim Last 4s
 
 ### 3a. Download Video
 
@@ -63,12 +63,12 @@ ffmpeg -i input/video.mp4 -i input/watermark.png \
 mv input/video-watermarked.mp4 input/video.mp4
 ```
 
-### 3c. Trim Last 3 Seconds (remove NotebookLM bumper)
+### 3c. Trim Last 4 Seconds (remove NotebookLM bumper)
 
 ```bash
 DURATION=$(ffprobe -v error -show_entries format=duration \
   -of default=noprint_wrappers=1:nokey=1 "input/video.mp4")
-TRIM_TO=$(echo "$DURATION - 3" | bc)
+TRIM_TO=$(echo "$DURATION - 4" | bc)
 ffmpeg -i "input/video.mp4" -t "$TRIM_TO" -c copy "input/video-trimmed.mp4"
 mv "input/video-trimmed.mp4" "input/video.mp4"
 ```
@@ -268,10 +268,14 @@ nlm studio status <notebook-id> -j
 
 ---
 
+## Status Reporting
+
+When user asks for status/progress, invoke the [pipeline-status](.agents/skills/pipeline-status/SKILL.md) skill and follow its checklist format. The pipeline itself does not own the report format.
+
 ## Core Rules
 
 - **Non-Blocking:** Launch operations and return immediately. Check status later with `nlm research status` / `nlm studio status`.
 - **No Unnecessary Confirmations:** Proceed directly unless genuinely ambiguous.
 - **Watermark Always:** Every downloaded video gets `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before trimming.
 - **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/`.
-- **Trim Always:** Every downloaded video gets last 3 seconds trimmed.
+- **Trim Always:** Every downloaded video gets last 4 seconds trimmed.

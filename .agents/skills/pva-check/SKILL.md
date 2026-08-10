@@ -29,6 +29,8 @@ nlm --version
 
 ### Step 4: Check PVA CLI
 
+PVA is a **local project dependency** — run from project root:
+
 ```bash
-pva --version
+npx pva version   # or: node_modules/.bin/pva version
 ```

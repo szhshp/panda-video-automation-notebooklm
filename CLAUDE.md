@@ -9,6 +9,7 @@ Available skills:
 - `notebooklm-research` — NotebookLM deep research workflow (sub-step of pipeline)
 - `notebooklm-video` — Create NotebookLM notebook + generate video (sub-step of pipeline)
 - `notebooklm-status` — List all notebooks and their artifacts
+- `pipeline-status` — Report pipeline progress as a ✅/⚠️ checklist (triggered on "status" / "check progress")
 - `get-notebooklm-video` — Download video artifact from NotebookLM
 - `notebooklm-prep-upload` — Prepare video for upload pipeline
 - `minimalist-academic-cover` — Generate minimalist academic-style cover images via Python/Pillow

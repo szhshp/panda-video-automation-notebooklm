@@ -54,11 +54,11 @@ nlm download video <notebook-id> -o input/video.mp4
 
 ### 3b. Add Watermark
 
-Apply `input/watermark.png` to the bottom-right corner of the video (1280×720).
+Apply `input/watermark.png` to the bottom-right corner of the video with zero padding (`W-w:H-h` computes flush position from main video and watermark dimensions).
 
 ```bash
 ffmpeg -i input/video.mp4 -i input/watermark.png \
-  -filter_complex "overlay=1055:645" \
+  -filter_complex "overlay=W-w:H-h" \
   -codec:a copy input/video-watermarked.mp4 -y
 mv input/video-watermarked.mp4 input/video.mp4
 ```

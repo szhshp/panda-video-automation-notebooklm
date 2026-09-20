@@ -16,9 +16,11 @@ When this skill is invoked, follow these steps in order:
 For each active pipeline, check the current state (no waiting, just a snapshot):
 
 ```bash
-nlm studio status <notebook-id> -j     # video/artifact status
-nlm research status <notebook-id>      # research status
+nlm studio status <notebook-id> -j            # video/artifact status
+nlm research status <notebook-id> --max-wait 0  # research status — snapshot, no waiting
 ```
+
+`--max-wait 0` is required: it defaults to **300**, so a bare `nlm research status` parks the command for up to 5 minutes and violates the pipeline's "No Background Waiting" rule.
 
 Also inspect local artifacts (download/watermark/trim/meta/cover/prepare) to know which post-video steps are done.
 

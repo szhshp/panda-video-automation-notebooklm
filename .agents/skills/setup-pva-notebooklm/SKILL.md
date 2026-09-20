@@ -56,7 +56,7 @@ nlm video create <notebook-id> --format explainer --style auto_select --language
 /skill get-notebooklm-video
 ```
 
-Downloads video to `/input/video.mp4` with `title.json`.
+Downloads video into `input/<slug>/video.mp4` with `title.json`, where `<slug>` is the notebook's English kebab-case folder name.
 
 ### Step 4: Prepare for Upload
 

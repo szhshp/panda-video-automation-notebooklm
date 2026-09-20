@@ -1,6 +1,6 @@
 ---
 name: minimalist-academic-cover
-description: Generate minimalist academic-style cover images via Python/Pillow — black (#000000) solid background, centered bold white title (120px), thin subtitle (76px) below. ONLY text on black — no graphics, icons, dates, or logos. TRIGGER: activates when user mentions "simple cover", "minimalist cover", "academic cover", or "cover" without further qualifiers. For "detailed cover", "complex cover", "report-style cover", or "detailed cover"/"complex cover", do NOT use this skill — instead generate a detailed infographic with --style professional or --style scientific.
+description: Generate minimalist academic-style cover images via Python/Pillow — black (#000000) solid background, centered bold bright-yellow title (130px), smaller yellow subtitle (86px) below, light gray caption last. ONLY text on black — no graphics, icons, dates, or logos. TRIGGER: activates when user mentions "simple cover", "minimalist cover", "academic cover", or "cover" without further qualifiers. For "detailed cover", "complex cover", "report-style cover", or "detailed cover"/"complex cover", do NOT use this skill — instead generate a detailed infographic with --style professional or --style scientific.
 ---
 
 # Minimalist Academic Cover Generator
@@ -27,7 +27,7 @@ Also requires a Chinese-capable font installed. On macOS these are built-in (Pin
 
 ### Step 2: Generate Cover with Python/Pillow
 
-Run the following Python script to generate a 1920×1080 pure black cover with bright yellow centered titles and dark stroke outline. Customize `title`/`caption` for the topic.
+Run the script below (a Bash block wrapping an inline Python heredoc) to generate a 1920×1080 pure black cover with bright yellow centered titles and dark stroke outline. Customize `title1`/`title2`/`cap1`/`cap2` for the topic. Keep the whole block intact — the trailing `PYEOF` closes the heredoc.
 
 **Design rules:**
 - Font sizes: title 130px, subtitle 86px (+10 over default)
@@ -36,9 +36,16 @@ Run the following Python script to generate a 1920×1080 pure black cover with b
 - All content must fit within the **center 60%** of the canvas (y: 216-864)
 - If caption is too long, **split into two lines** to prevent canvas overflow
 
-```python
+**Export the slug — never let the script guess it.** `os.environ["NB"]` reads an *exported* variable, which is what `export` below provides. A bare `NB=<slug>` on its own line does not survive into a later command, so the script fails loudly rather than silently defaulting — a guessed slug would write the cover into the wrong notebook's folder.
+
+```bash
+export NB=zhipu-zcode
+mkdir -p "input/$NB"
+python3 - <<'PYEOF'
+import os
 from PIL import Image, ImageDraw, ImageFont
 
+NB = os.environ["NB"]  # required — no fallback: a wrong slug writes the wrong folder
 W, H = 1920, 1080
 img = Image.new('RGB', (W, H), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
@@ -95,20 +102,31 @@ tx4, ty4 = (W - tw4) // 2, ty3 + th3 + gap_cap
 draw.text((tx4, ty4), cap2, fill=LIGHT_GRAY, font=font_sub,
           stroke_width=2, stroke_fill=STROKE_COLOR)
 
-img.save('input/cover.png')
+img.save(f'input/{NB}/cover.png')
+PYEOF
 ```
 
 **Adjust font sizes** by changing `ImageFont.truetype()` arguments (title 130, subtitle 86 recommended). **Adjust vertical spacing** by changing `gap_1_2`, `gap_2_3`, `gap_cap`. **If caption fits in one line**, omit `cap2` and adjust total_height accordingly.
 
 ### Step 3: Copy to Output Path
 
+Covers live in the notebook's own folder — set `NB` to its slug first (see [notebooklm-pipeline](.agents/skills/notebooklm-pipeline/SKILL.md) → Step 0):
+
 ```bash
-cp input/cover.png output/video/cover.png
+NB=zhipu-zcode
+mkdir -p "output/$NB/video"          # the pipeline's Step 6 creates this, but this
+cp "input/$NB/cover.png" "output/$NB/video/cover.png"   # skill may run standalone
 ```
 
 ### Step 4: Verify Output
 
-Confirm the output file exists at `input/cover.png` and is a valid PNG (check it visually).
+Confirm both copies exist and are valid PNGs (open them — a cover that looks wrong is worse than no cover):
+
+```bash
+ls -l "input/$NB/cover.png" "output/$NB/video/cover.png"
+```
+
+`input/$NB/cover.png` is the notebook's working copy; `output/$NB/video/cover.png` is what the upload reads.
 
 ---
 

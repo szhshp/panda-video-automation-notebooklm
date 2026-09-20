@@ -10,10 +10,57 @@ This is the **single entry point** for the complete Panda Video Automation pipel
 ## Pipeline Overview
 
 ```
-Research → Video → Download → Watermark → Trim
+Workspace → Research → Video → Download → Watermark → Trim
 → Meta (title/desc/tags) → Cover
 → Prepare Upload → Publish
 ```
+
+---
+
+## Step 0: Workspace (do this first)
+
+Every notebook gets its own folder under `input/`, named with an **English kebab-case slug** derived from the notebook topic. Finished notebooks stay in place — never move them into an archive bucket, and never reuse another notebook's folder.
+
+```
+input/
+├── watermark.png          # shared asset, git-tracked — stays at input/ root
+├── <slug>/
+│   ├── video.mp4          # downloaded → watermarked → trimmed
+│   ├── title.json
+│   ├── description.md
+│   ├── tags.json
+│   └── cover.png
+└── <other-slug>/          # one folder per notebook, side by side
+
+output/
+└── <slug>/
+    ├── video/
+    │   ├── video.mp4
+    │   └── cover.png
+    └── spider/
+        ├── title.json
+        ├── description.md
+        └── tags.json
+```
+
+**Slug rules:** lowercase ASCII, hyphens, no spaces. Derive from the topic:
+
+| Notebook title | Slug |
+|---|---|
+| 智谱ZCode被曝偷传用户数据 | `zhipu-zcode` |
+| 宁波夜市砸瓜事件 | `ningbo-watermelon` |
+| 名古屋机场运动员滞留 | `nagoya-airport` |
+
+Never use the raw notebook UUID or Chinese text as a folder name.
+
+**Set the slug once at the start of a run, then reuse it in every command below:**
+
+```bash
+NB=zhipu-zcode
+mkdir -p "input/$NB"
+```
+
+> All commands below assume `$NB` is set. `watermark.png` is the one file that stays at the `input/` root — it is shared by every run.
 
 ---
 
@@ -23,8 +70,8 @@ Research → Video → Download → Watermark → Trim
 2. Ask user for research topic
 3. Create notebook and start deep web research (`nlm research start "<topic>" -m deep -n <notebook-id>`)
 4. Tell user ~5 min, come back later
-5. When user returns: check status, import all sources (`nlm research import <id>`)
-6. Generate summary via `nlm describe notebook <id>`
+5. When user returns: check status, import all sources (`nlm research import <notebook-id> <task-id>`)
+6. Generate summary via `nlm describe notebook <notebook-id>`
 
 ## Step 2: Generate Video
 
@@ -49,28 +96,28 @@ Proceed when status is `completed`.
 ### 3a. Download Video
 
 ```bash
-nlm download video <notebook-id> -o input/video.mp4
+nlm download video <notebook-id> -o "input/$NB/video.mp4"
 ```
 
 ### 3b. Add Watermark
 
-Apply `input/watermark.png` to the bottom-right corner of the video with zero padding (`W-w:H-h` computes flush position from main video and watermark dimensions).
+Apply `input/watermark.png` (shared asset at the `input/` root) to the bottom-right corner of the video with zero padding (`W-w:H-h` computes flush position from main video and watermark dimensions).
 
 ```bash
-ffmpeg -i input/video.mp4 -i input/watermark.png \
+ffmpeg -i "input/$NB/video.mp4" -i input/watermark.png \
   -filter_complex "overlay=W-w:H-h" \
-  -codec:a copy input/video-watermarked.mp4 -y
-mv input/video-watermarked.mp4 input/video.mp4
+  -codec:a copy "input/$NB/video-watermarked.mp4" -y
+mv "input/$NB/video-watermarked.mp4" "input/$NB/video.mp4"
 ```
 
 ### 3c. Trim Last 4 Seconds (remove NotebookLM bumper)
 
 ```bash
 DURATION=$(ffprobe -v error -show_entries format=duration \
-  -of default=noprint_wrappers=1:nokey=1 "input/video.mp4")
-TRIM_TO=$(echo "$DURATION - 4" | bc)
-ffmpeg -i "input/video.mp4" -t "$TRIM_TO" -c copy "input/video-trimmed.mp4"
-mv "input/video-trimmed.mp4" "input/video.mp4"
+  -of default=noprint_wrappers=1:nokey=1 "input/$NB/video.mp4")
+TRIM_TO=$(python3 -c "print(f'{$DURATION-4:.3f}')")
+ffmpeg -i "input/$NB/video.mp4" -t "$TRIM_TO" -c copy "input/$NB/video-trimmed.mp4"
+mv "input/$NB/video-trimmed.mp4" "input/$NB/video.mp4"
 ```
 
 > `ffmpeg` required: `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux)
@@ -90,7 +137,7 @@ The decided short title goes into `title.json` and as the first line of `descrip
 ### 4b. Create title.json
 
 ```bash
-echo '{"title": "<decided-short-title>"}' > input/title.json
+echo '{"title": "<decided-short-title>"}' > "input/$NB/title.json"
 ```
 
 ### 4c. Create description.md
@@ -107,7 +154,7 @@ Format: first line = headline title, then ≤3 topic lines, each ≤50 character
 ```
 
 ```bash
-cat > input/description.md << 'EOF'
+cat > "input/$NB/description.md" << 'EOF'
 <video-title>
 
 视频看点：
@@ -142,7 +189,7 @@ VIDEO_DESC="<video-title>
 Pick ≤3 most relevant tags for the topic.
 
 ```bash
-cat > input/tags.json << 'EOF'
+cat > "input/$NB/tags.json" << 'EOF'
 {
   "tags": ["<tag1>", "<tag2>"]
 }
@@ -156,9 +203,11 @@ EOF
 Use Python/Pillow to generate a minimalist academic cover:
 
 ```bash
-python3 << 'PYEOF'
+NB=zhipu-zcode python3 << 'PYEOF'
+import os
 from PIL import Image, ImageDraw, ImageFont
 
+NB = os.environ["NB"]
 W, H = 1920, 1080
 img = Image.new('RGB', (W, H), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
@@ -180,20 +229,24 @@ STROKE_COLOR = (30, 20, 0)
 # Compute positions and draw...
 # (See full script in minimalist-academic-cover skill)
 
-img.save('input/cover.png')
+img.save(f'input/{NB}/cover.png')
 PYEOF
 ```
 
 Cover saved to:
-- `input/cover.png`
+- `input/$NB/cover.png`
 
 ## Step 6: Prepare for Upload
 
+This step is the **gate** — Step 7 uploads from `output/$NB/`, so nothing reaches a platform until it lands here. Run it only after the video is watermarked, trimmed, and every metadata file plus the cover exists in `input/$NB/`.
+
 ```bash
-mkdir -p output/video output/spider
-cp input/video.mp4 output/video/video.mp4
-cp input/title.json output/spider/title.json
-cp input/cover.png output/video/cover.png
+mkdir -p "output/$NB/video" "output/$NB/spider"
+cp "input/$NB/video.mp4"      "output/$NB/video/video.mp4"
+cp "input/$NB/cover.png"      "output/$NB/video/cover.png"
+cp "input/$NB/title.json"     "output/$NB/spider/title.json"
+cp "input/$NB/description.md" "output/$NB/spider/description.md"
+cp "input/$NB/tags.json"      "output/$NB/spider/tags.json"
 ```
 
 ## Step 7: Publish
@@ -206,20 +259,57 @@ npx pva weixin login
 npx pva bilibili login
 npx pva douyin login
 npx pva kuaishou login
+```
 
-# Batch upload to all 4 platforms in parallel (single command)
-V="$(pwd)/input/video.mp4" && C="$(pwd)/input/cover.png" \
-  && T="$(cat input/title.json | jq -r .title)" \
-  && G="$(cat input/tags.json | jq -r '.tags | join(",")')" \
-  && D="$(cat input/description.md)" \
-  && node_modules/.bin/pva bilibili upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva douyin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva kuaishou upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & node_modules/.bin/pva weixin upload --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
-  & wait
+**Check which platforms still have valid auth before uploading:**
+
+```bash
+ls -la node_modules/@panda-video-automation/pva/playwright/.auth/
+```
+
+Uploads read from **`output/$NB/`** — the upload-ready copy that Step 6 (or prep-upload's Step 8) fills. `input/$NB/` is the working area; never upload from it, or a half-trimmed or unwatermarked intermediate can go out.
+
+Batch upload to all 4 platforms in parallel:
+
+```bash
+NB=zhipu-zcode
+V="$(pwd)/output/$NB/video/video.mp4"
+C="$(pwd)/output/$NB/video/cover.png"
+T="$(jq -r .title "output/$NB/spider/title.json")"
+G="$(jq -r '.tags | join(",")' "output/$NB/spider/tags.json")"
+D="$(cat "output/$NB/spider/description.md")"
+LOG="/tmp/pva_upload_${NB}_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$LOG"
+
+# Assign the variables FIRST, then background each upload.
+# Do NOT chain assignments into the backgrounded command with `&&` — the
+# subshells can start before the variables are set.
+for p in bilibili douyin kuaishou weixin; do
+  node_modules/.bin/pva "$p" upload \
+    --video "$V" --title "$T" --desc "$D" --tags "$G" --cover "$C" \
+    > "$LOG/$p.log" 2>&1 &
+done
+wait
+
+# Always read the per-platform logs — the overall exit code does NOT tell you
+# whether each platform succeeded.
+for p in bilibili douyin kuaishou weixin; do
+  echo "--- $p ---"; tail -8 "$LOG/$p.log"
+done
 ```
 
 > This launches 4 browser instances in parallel, one per platform. Each runs independently without interference.
+
+**Reading the results:** each platform prints its own verdict, and they differ:
+
+| Platform | Success signal | Trust level |
+|---|---|---|
+| bilibili | `Success: Bilibili` | ✅ asserts success |
+| kuaishou | `内容发布成功` | ✅ asserts success |
+| weixin | `Success: Weixin` | ✅ asserts success |
+| douyin | `Success: Douyin (check manually)` | ⚠️ **clicked publish, did not assert** — verify in the app |
+
+`--video`/`--cover` must be **absolute paths** — the `pva` CLI runs Playwright with its own `cwd`, so relative paths fail.
 
 ---
 
@@ -229,19 +319,23 @@ After pipeline completes:
 
 ```
 input/
-├── video.mp4          (trimmed + watermark applied)
-├── watermark.png      (watermark source image)
-├── title.json         (title metadata)
-├── description.md     (≤3 topics)
-├── tags.json          (≤3 tags)
-└── cover.png          (minimalist cover)
+├── watermark.png      (shared watermark source — never moves)
+└── <slug>/
+    ├── video.mp4      (trimmed + watermark applied)
+    ├── title.json
+    ├── description.md (≤3 topics)
+    ├── tags.json      (≤3 tags)
+    └── cover.png      (minimalist cover)
 
 output/
-├── video/
-│   ├── video.mp4      (ready for upload)
-│   └── cover.png      (ready for upload)
-└── spider/
-    └── title.json     (ready for upload)
+└── <slug>/
+    ├── video/
+    │   ├── video.mp4  (ready for upload)
+    │   └── cover.png  (ready for upload)
+    └── spider/
+        ├── title.json
+        ├── description.md
+        └── tags.json
 ```
 
 ---
@@ -251,13 +345,14 @@ output/
 **User:** "make a video about [topic]"
 
 **Agent — just do it, no unnecessary questions:**
-1. **Step 1** → Research (create, deep research, import, summarize)
-2. **Step 2** → Generate video (background, tell user ~5 min)
-3. **Step 3** → Download video → Add watermark → Trim last 3s
-4. **Step 4** → Generate meta files (titles, description, tags)
-5. **Step 5** → Generate cover
-6. **Step 6** → Prepare for upload
-7. **Step 7** → Ask user which platform to publish to
+1. **Step 0** → Workspace: pick the slug, `mkdir -p "input/$NB"`
+2. **Step 1** → Research (create, deep research, import, summarize)
+3. **Step 2** → Generate video (background, tell user ~5 min)
+4. **Step 3** → Download video → Add watermark → Trim last 4s
+5. **Step 4** → Generate meta files (titles, description, tags)
+6. **Step 5** → Generate cover
+7. **Step 6** → Prepare for upload
+8. **Step 7** → Ask user which platform to publish to
 
 **User:** "check progress"
 
@@ -274,8 +369,11 @@ When user asks for status/progress, invoke the [pipeline-status](.agents/skills/
 
 ## Core Rules
 
-- **Non-Blocking:** Launch operations and return immediately. Check status later with `nlm research status` / `nlm studio status`.
+- **One folder per notebook:** every run works inside `input/<slug>/`, named with an English kebab-case slug. Never write pipeline artifacts to the `input/` root, and never overwrite another notebook's folder. `watermark.png` is the single exception — it stays at the `input/` root.
+- **Non-Blocking:** Launch operations and return immediately. Check status later with `nlm research status <id> --max-wait 0` / `nlm studio status <id> -j` — both are instant snapshots.
+- **No Background Waiting:** Never park a waiting process. No polling loop, no monitor/watch task, no long-poll flag (`--max-wait 300`), no "I'll continue automatically when it finishes". Launch the operation, tell the user the ETA (~5 min), then **end the turn**. The user waits and comes back — the agent does not. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
 - **No Unnecessary Confirmations:** Proceed directly unless genuinely ambiguous.
 - **Watermark Always:** Every downloaded video gets `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before trimming.
-- **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/`.
+- **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/<slug>/`.
+- **Upload from `output/<slug>/` only:** `input/` holds working files; `output/` holds the upload-ready copies filled by Step 6. Publishing straight from `input/` can ship an untrimmed or unwatermarked video.
 - **Trim Always:** Every downloaded video gets last 4 seconds trimmed.

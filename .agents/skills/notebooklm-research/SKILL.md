@@ -15,6 +15,24 @@ Research a topic using NotebookLM: create a notebook, run deep web research with
 2. **Immediately return to the user** — tell them what's running and how long it'll take
 3. **The user will check back later** and re-invoke if needed
 
+### Never park a waiting process
+
+The wait belongs to the **user**, not to the agent. After launching a remote operation (research, import, video generation), report the ETA and **end the turn**. Do NOT keep yourself busy waiting for it. Concretely, never:
+
+- Run a background polling loop (`while` / `for` + `sleep`, `until ... done`)
+- Arm a monitor / watch task that fires when the remote status changes
+- Block on a long-poll flag such as `nlm research status <id> --max-wait 300`
+- Tell the user "I'll continue automatically once it finishes" — you won't, and the parked process just burns tokens in the background
+
+Every status check in this project is a **single, instant snapshot**:
+
+```bash
+nlm research status <notebook-id> --max-wait 0   # returns immediately, never blocks
+nlm studio status <notebook-id> -j               # instant
+```
+
+If the operation is still running, say so and let the user come back. One snapshot per user request — not a loop.
+
 ## Workflow Steps
 
 When this skill is invoked, follow these steps in order:

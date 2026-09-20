@@ -40,6 +40,8 @@ Wait for the user to provide the research title/topic.
 4. Tell the user the video is being generated — check back in about 5 minutes.
 5. If declined, skip video generation and report notebook creation only.
 
+> **Do not wait for it.** End the turn after reporting. No polling loop, no monitor task, no `--max-wait` — the user waits, not the agent. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
+
 ## Example
 
 User: `/notebooklm-video`

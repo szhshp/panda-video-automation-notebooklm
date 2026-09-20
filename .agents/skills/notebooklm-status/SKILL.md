@@ -33,6 +33,8 @@ nlm studio status <notebook-id> -j
 
 Collect all artifacts from all notebooks.
 
+> Snapshot only — one pass, no polling loop, no monitor task. If something is still `in_progress`, just report it and let the user come back. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
+
 ### Step 4: Report Summary
 
 Present a summary table to the user with:

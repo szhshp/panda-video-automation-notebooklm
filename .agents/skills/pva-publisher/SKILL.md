@@ -1,6 +1,6 @@
 ---
 name: pva-publisher
-description: Cross-platform video upload (login only when explicitly requested) — Bilibili, Douyin, Kuaishou, Weixin Video, YouTube
+description: Cross-platform video upload (login only when explicitly requested) — Bilibili, Douyin, Kuaishou, Weixin Video, YouTube. Also covers upload failures such as "Not logged in! Please run login script first" and the unreliable pva exit code.
 ---
 
 # PVA Publisher
@@ -72,7 +72,7 @@ done
 
 > ✅ 已验证可用。`jq` 直接读文件（不用管道），四平台后台并行跑，`wait` 等全部完成。
 
-> ⚠️ **别只看整体退出码。** 每个平台各自打印自己的结论，而且不一样：bilibili / kuaishou / weixin 会断言成功提示，**douyin 只打印 `Success: Douyin (check manually)`** —— 它点了发布按钮但没验证结果，必须人工进 App 确认。所以每次都要逐个读 `/tmp/pva_upload_*/<平台>.log`。
+> ⚠️ **别只看整体退出码。** 每个平台各自打印自己的结论，而且不一样：bilibili / kuaishou / weixin 会断言成功提示；**douyin 从 pva v0.1.12 起改为等页面跳转到内容管理页（`/creator-micro/content/manage`），跳到了才打印 `Success: Douyin`**，60 秒没跳就退回 `Success: Douyin (check manually)`——只有看到这行才需要人工确认。所以每次都要逐个读 `/tmp/pva_upload_*/<平台>.log`。
 
 ### All headed (default)
 
@@ -86,8 +86,8 @@ wait
 
 - **Always use headed mode** (visible browser). Never use `--headless` for uploads.
 - Each `pva` process launches its own Playwright browser instance — no conflict between platforms.
-- Saved auth state is in `node_modules/@panda-video-automation/pva/playwright/.auth/` (local project dependency).
-- Login only needs to be done once; subsequent uploads reuse saved sessions.
+- Saved auth state is in `node_modules/@panda-video-automation/pva/playwright/.auth/` (local project dependency) — **which means a dependency reinstall deletes it silently.** See Pitfall 4.
+- Login only needs to be done once; subsequent uploads reuse saved sessions — until the next reinstall.
 - `npx pva --help` for full CLI reference.
 
 ## 🚨 Pitfalls & Solutions
@@ -136,9 +136,55 @@ DESC=$(cat "output/$NB/spider/description.md")
 npx pva bilibili upload --desc "$DESC" ...
 ```
 
+### 4. Auth state is wiped by a dependency reinstall
+
+`pva` resolves login state as `path.join(process.cwd(), 'playwright/.auth', '<platform>.json')`, with `cwd` set to the package directory — so saved sessions live at `node_modules/@panda-video-automation/pva/playwright/.auth/`. Because that path is inside `node_modules`, **any reinstall removes it with no warning**: a `package.json` / `package-lock.json` change, `npm ci`, a fresh clone, a `node_modules` cleanup.
+
+Upload then fails fast with:
+
+```
+Error: Not logged in! Please run login script first:
+```
+
+This is a login-judgement failure, not a flake and not a timeout. **Re-running the upload never fixes it** — the platform needs a fresh login. Confirm before launching anything:
+
+```bash
+ls -la node_modules/@panda-video-automation/pva/playwright/.auth/
+```
+
+An older copy of these files may survive at `~/.Trash/playwright/.auth/` (from when this project kept them at the repo root). Restoring one is a gamble: a Bilibili session still worked after ~4 months, while Douyin's and Kuaishou's at the same age were both rejected as not-logged-in. Treat restoring as a cheap first attempt only, and expect to re-login anyway.
+
+### 5. Never close the browser during login
+
+The login spec **deletes the existing auth file first**, then writes a new one only after login is detected:
+
+```
+🗑️  Deleting old authentication file: .../.auth/kuaishou.json
+🌐 Opening Kuaishou...
+Error: page.waitForTimeout: Target page, context or browser has been closed
+```
+
+Closing the window mid-login therefore leaves that platform with **no** auth file at all — strictly worse than the stale file it started with. Keep the browser open until the log prints `Authentication state saved`; the spec polls login status every 5 seconds and gives up after 15 minutes.
+
+### 6. The CLI exit code is not a verdict — read the log
+
+`pva` returns shell success even when the Playwright run inside it fails. An interrupted login returned `exit=0` to the caller while its own log ended in `1 failed`; a background task reported `completed` for the same run. Never branch on `$?` or on a background task's status — grep each platform's log for its own success line.
+
+| Platform | Success signal | Trust |
+|---|---|---|
+| Bilibili | `Success: Bilibili` | ✅ asserts success |
+| Kuaishou | `内容发布成功` | ✅ asserts success |
+| Weixin | `Success: Weixin` | ✅ asserts success |
+| Douyin | `Success: Douyin` | ✅ waits for redirect to `/creator-micro/content/manage` (pva ≥ v0.1.12) |
+| Douyin | `Success: Douyin (check manually)` | ⚠️ publish clicked, redirect not observed within ~60s — **verify in the app before re-running**, or you double-post |
+
+The `(check manually)` verdict is genuinely uncertain, not a soft failure: a re-run in the same situation landed the real `Success: Douyin`, meaning the first attempt had not published. Check the platform's content manager first, then decide.
+
 ## Behavioral Rules
 
-- **Do NOT check login status unless the user explicitly mentions it.** Skip `--check` / login verification steps entirely by default.
+- **Pre-flight the auth files; do not interrogate the user.** Before an upload run, list the auth directory and confirm every target platform has a `<platform>.json`. This is a file listing — not a login check, not a `--check` round-trip, and it launches nothing. It catches the wiped-auth case (Pitfall 4) before four browsers spin up.
+- Do not ask "are you logged in?". A *missing* file is answered by the listing; a *present but stale* file is answered by the upload itself.
+- **Never run `login` on your own initiative.** It is interactive (the user must scan a QR code), and it deletes the old auth file before saving a new one (Pitfall 5). When the listing shows missing auth, report which platforms are affected and ask the user to log in.
 - When the user says "upload to [platforms]", directly open upload commands for all listed platforms in **parallel** (using `&` + `wait`).
-- Do not ask "are you logged in?" or attempt to verify credentials upfront. If a platform requires login, the browser will prompt for it naturally.
-- **Upload from `output/<slug>/`, never from `input/<slug>/`.** `input/` is the working area (intermediates, untrimmed or unwatermarked video); `output/` is the upload-ready copy. Title: `output/<slug>/spider/title.json`. Video: `output/<slug>/video/video.mp4`. Cover: `output/<slug>/video/cover.png`. Never read from either root — `input/` root holds only the shared `watermark.png`.
+- **Upload from `output/<slug>/`, never from `input/<slug>/`.** `input/` is the working area (clean master, watermarked master, versioned BGM mixes); `output/` is the upload-ready copy. Title: `output/<slug>/spider/title.json`. Video: `output/<slug>/video/video.mp4`. Cover: `output/<slug>/video/cover.png`. Never read from either root — `input/` root holds only the shared `watermark.png`.
+- **Read every platform's log before reporting success.** The CLI exit code is not a verdict (Pitfall 6).

@@ -1,7 +1,7 @@
 {
   "name": "notebooklm-research",
   "version": "1.0.0",
-  "description": "Create a NotebookLM notebook for a research topic, run web research, and import sources",
+  "description": "Create a NotebookLM notebook for a research topic, run web research, import sources, and download the research report",
   "skill": "SKILL.md",
   "keywords": ["research", "search", "notebooklm", "deep research", "web research"]
 }

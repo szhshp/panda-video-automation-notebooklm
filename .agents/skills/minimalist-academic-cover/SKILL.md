@@ -114,7 +114,7 @@ Covers live in the notebook's own folder — set `NB` to its slug first (see [no
 
 ```bash
 NB=zhipu-zcode
-mkdir -p "output/$NB/video"          # the pipeline's Step 6 creates this, but this
+mkdir -p "output/$NB/video"          # the pipeline's Step 7 creates this, but this
 cp "input/$NB/cover.png" "output/$NB/video/cover.png"   # skill may run standalone
 ```
 

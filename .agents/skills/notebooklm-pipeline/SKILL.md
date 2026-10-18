@@ -1,19 +1,21 @@
 ---
 name: notebooklm-pipeline
-description: "[ENTRY POINT] Full NotebookLM pipeline — research → generate video → download → watermark → trim → generate meta files → cover → prepare upload → publish. Single entry point for all end-to-end video tasks."
+description: "[ENTRY POINT] Full pipeline — research + NotebookLM report → external explainer video → watermark → BGM → meta → cover → prepare upload → publish. Single entry point for all end-to-end video tasks."
 ---
 
 # NotebookLM Pipeline — Master Entry Point
 
-This is the **single entry point** for the complete Panda Video Automation pipeline. All work starts here. Every step is handled directly — no redirections.
+This is the **single entry point** for the complete Panda Video Automation pipeline. Every step is handled directly — no redirections.
 
 ## Pipeline Overview
 
 ```
-Workspace → Research → Video → Download → Watermark → Trim
-→ Meta (title/desc/tags) → Cover
+Workspace → Research + report → Explainer video (external)
+→ Watermark → BGM → Meta (title/desc/tags) → Cover
 → Prepare Upload → Publish
 ```
+
+> **Division of labour:** steps 0–1 and 3–8 run in this repo. Step 2 (the explainer video) is produced by an external HyperFrames project and handed back as a clean master.
 
 ---
 
@@ -23,19 +25,22 @@ Every notebook gets its own folder under `input/`, named with an **English kebab
 
 ```
 input/
-├── watermark.png          # shared asset, git-tracked — stays at input/ root
-├── <slug>/
-│   ├── video.mp4          # downloaded → watermarked → trimmed
-│   ├── title.json
-│   ├── description.md
-│   ├── tags.json
-│   └── cover.png
-└── <other-slug>/          # one folder per notebook, side by side
+├── watermark.png           # shared asset, git-tracked — stays at input/ root
+├── bgm/                    # optional shared music library (gitignored)
+└── <slug>/
+    ├── research-report.md  # NotebookLM report — source of truth for every later step
+    ├── video.mp4           # clean master from the external project — never modified
+    ├── video-watermarked.mp4
+    ├── video-bgm-v<N>.mp4  # versioned BGM mixes
+    ├── title.json
+    ├── description.md
+    ├── tags.json
+    └── cover.png
 
 output/
 └── <slug>/
     ├── video/
-    │   ├── video.mp4
+    │   ├── video.mp4       # upload copy of the approved BGM version
     │   └── cover.png
     └── spider/
         ├── title.json
@@ -64,69 +69,106 @@ mkdir -p "input/$NB"
 
 ---
 
-## Step 1: Research
+## Step 1: Research + Report
+
+Use the [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) skill. The short version:
 
 1. Check NotebookLM installation & login
-2. Ask user for research topic
+2. Ask user for the research topic
 3. Create notebook and start deep web research (`nlm research start "<topic>" -m deep -n <notebook-id>`)
 4. Tell user ~5 min, come back later
-5. When user returns: check status, import all sources (`nlm research import <notebook-id> <task-id>`)
-6. Generate summary via `nlm describe notebook <notebook-id>`
-
-## Step 2: Generate Video
-
-Generate video overview in Simplified Chinese:
+5. When the user returns: check status, import all sources (`nlm research import <notebook-id> <task-id>`)
+6. Generate and download the report:
 
 ```bash
-nlm video create <notebook-id> --format explainer --style auto_select --language zh_Hans -y -j
+nlm report create <notebook-id> --language zh-Hans -y -j
+nlm download report <notebook-id> -o "input/$NB/research-report.md"
 ```
 
-Report artifact info to user. Tell them ~5 min, come back to check.
+`research-report.md` is the **single source of truth** for the next steps: it is the only input the external video project gets, and every number on screen, the title, the description, and the cover text must trace back to it. Never overwrite an existing report without asking the user first.
 
-**Check status:**
+> Non-blocking rules are unchanged: one instant status snapshot per user request, never a polling loop. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
+
+---
+
+## Step 2: Explainer Video (External Project)
+
+**This repo no longer generates, downloads, or trims NotebookLM video.** The explainer video is produced by the external HyperFrames project using the `faceless-explainer` workflow.
+
+**External project location:**
 
 ```bash
-nlm studio status <notebook-id> -j
+HF_ROOT="${HYPERFRAMES_ROOT:-/Users/Zill/Documents/Dev/Github/hyperframes}"
+PROJECT="$HF_ROOT/videos/$NB"
 ```
 
-Proceed when status is `completed`.
+**Handoff contract — out:**
 
-## Step 3: Download → Add Watermark → Trim Last 4s
+- `input/$NB/research-report.md` (absolute path)
+- the slug
+- target 60–120 seconds, 1920×1080, Simplified Chinese narration
 
-### 3a. Download Video
+**Handoff contract — back:**
+
+- lands at `input/$NB/video.mp4`
+- 1920×1080, 30 fps
+- **clean master**: no watermark, no background music, no end bumper/logo outro
+- audio already mixed (narration only)
+
+**Gate the return.** Verify spec and reject a dirty master before continuing:
 
 ```bash
-nlm download video <notebook-id> -o "input/$NB/video.mp4"
+ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height,r_frame_rate \
+  -of default=noprint_wrappers=1 "input/$NB/video.mp4"
 ```
 
-### 3b. Add Watermark
+If the video already carries a watermark, music, or a bumper, stop and report it — do not stack a second watermark or mix music over an unknown mix.
 
-Apply `input/watermark.png` (shared asset at the `input/` root) to the bottom-right corner of the video with zero padding (`W-w:H-h` computes flush position from main video and watermark dimensions).
+> The external project is **not** an npm dependency of this repo and is **not** in this git repository. If `$PROJECT` is missing, report that the external renderer is unavailable; do not fall back to `nlm video create`.
+
+---
+
+## Step 3: Add Watermark
+
+Apply `input/watermark.png` (shared asset at the `input/` root) to the bottom-right corner of the clean master with zero padding (`W-w:H-h` computes flush position from main video and watermark dimensions). Watermark text: `熊猫视频自动化引擎` + `https://panda.szhshp.org`.
 
 ```bash
 ffmpeg -i "input/$NB/video.mp4" -i input/watermark.png \
   -filter_complex "overlay=W-w:H-h" \
   -codec:a copy "input/$NB/video-watermarked.mp4" -y
-mv "input/$NB/video-watermarked.mp4" "input/$NB/video.mp4"
 ```
 
-### 3c. Trim Last 4 Seconds (remove NotebookLM bumper)
+**Never overwrite the clean master.** The output is `video-watermarked.mp4`; `video.mp4` stays untouched so watermark and BGM retries never re-encode a derived file.
 
-```bash
-DURATION=$(ffprobe -v error -show_entries format=duration \
-  -of default=noprint_wrappers=1:nokey=1 "input/$NB/video.mp4")
-TRIM_TO=$(python3 -c "print(f'{$DURATION-4:.3f}')")
-ffmpeg -i "input/$NB/video.mp4" -t "$TRIM_TO" -c copy "input/$NB/video-trimmed.mp4"
-mv "input/$NB/video-trimmed.mp4" "input/$NB/video.mp4"
-```
+> **Legacy folders:** older runs applied the watermark in place, so their `video.mp4` already carries it and there is no `video-watermarked.mp4`. Do not watermark those again — treat the existing `video.mp4` as the watermarked master and skip to Step 4.
 
 > `ffmpeg` required: `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux)
 
-## Step 4: Generate Meta Files
+---
 
-### 4a. Generate Engaging Title
+## Step 4: Add Background Music
 
-Generate a title directly from the artifact title — **do NOT ask the user to confirm or choose**. Decide it yourself and use it immediately.
+Use the [video-bgm](.agents/skills/video-bgm/SKILL.md) skill.
+
+Summary of the contract:
+
+- input: `input/$NB/video-watermarked.mp4` (fallback to `video.mp4` for legacy folders whose watermark is already baked in)
+- output: `input/$NB/video-bgm-v<N>.mp4`
+- music volume **0.6** (−4.4 dB)
+- fade out over the **final 10 seconds** of the video
+- never overwrite `video.mp4` or `video-watermarked.mp4`; each retry gets the next `N`
+- never overwrite an existing `video-bgm-v<N>.mp4`
+
+The BGM is applied outside the external video project. Re-rendering the video does not carry the music — rerun this step after any re-render.
+
+---
+
+## Step 5: Generate Meta Files
+
+### 5a. Generate Engaging Title
+
+Generate a title from `input/$NB/research-report.md` — **do NOT ask the user to confirm or choose**. Decide it yourself and use it immediately.
 
 - **Fixed short title rule:** Always use a short title ≤12 Chinese characters as the main title for all platforms. Never present alternatives or ask the user to pick.
 - **Simple & clear:** Title must be easy to understand at a glance — plain everyday words, the core event/point named directly, no jargon, no clever ambiguity.
@@ -134,13 +176,13 @@ Generate a title directly from the artifact title — **do NOT ask the user to c
 
 The decided short title goes into `title.json` and as the first line of `description.md`.
 
-### 4b. Create title.json
+### 5b. Create title.json
 
 ```bash
 echo '{"title": "<decided-short-title>"}' > "input/$NB/title.json"
 ```
 
-### 4c. Create description.md
+### 5c. Create description.md
 
 Format: first line = headline title, then ≤3 topic lines, each ≤50 characters.
 
@@ -184,7 +226,7 @@ VIDEO_DESC="<video-title>
 3. <topic-3>" npx pva bilibili upload
 ```
 
-### 4d. Create tags.json
+### 5d. Create tags.json
 
 Pick ≤3 most relevant tags for the topic.
 
@@ -198,58 +240,49 @@ EOF
 
 **Constraints:** Max 3 tags. Most platforms (e.g. Bilibili) enforce this limit.
 
-## Step 5: Generate Cover Image
+---
 
-Use Python/Pillow to generate a minimalist academic cover:
+## Step 6: Generate Cover Image
+
+Use the [minimalist-academic-cover](.agents/skills/minimalist-academic-cover/SKILL.md) skill to generate a 1920×1080 cover with Python/Pillow from the decided title and the research report.
 
 ```bash
 NB=zhipu-zcode python3 << 'PYEOF'
-import os
-from PIL import Image, ImageDraw, ImageFont
-
-NB = os.environ["NB"]
-W, H = 1920, 1080
-img = Image.new('RGB', (W, H), color=(0, 0, 0))
-draw = ImageDraw.Draw(img)
-
-font_path = '/System/Library/Fonts/STHeiti Light.ttc'  # macOS
-# Linux: '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc'
-
-title = '<title-line-1>'
-subtitle = '<title-line-2>'
-caption = '<caption>'
-
-font_title = ImageFont.truetype(font_path, 130)
-font_sub = ImageFont.truetype(font_path, 86)
-
-BRIGHT_YELLOW = (255, 215, 0)
-LIGHT_GRAY = (200, 200, 200)
-STROKE_COLOR = (30, 20, 0)
-
-# Compute positions and draw...
-# (See full script in minimalist-academic-cover skill)
-
-img.save(f'input/{NB}/cover.png')
+# see the full script in minimalist-academic-cover
 PYEOF
 ```
 
-Cover saved to:
-- `input/$NB/cover.png`
+Cover saved to `input/$NB/cover.png`.
 
-## Step 6: Prepare for Upload
+---
 
-This step is the **gate** — Step 7 uploads from `output/$NB/`, so nothing reaches a platform until it lands here. Run it only after the video is watermarked, trimmed, and every metadata file plus the cover exists in `input/$NB/`.
+## Step 7: Prepare for Upload
+
+This step is the **gate** — Step 8 uploads from `output/$NB/`, so nothing reaches a platform until it lands here. Run it only after the video is watermarked, the BGM version is approved, and every metadata file plus the cover exists in `input/$NB/`.
+
+**Select the BGM version.** Use the highest `N` unless the user explicitly names a different version:
+
+```bash
+BGM_FILE="${VIDEO_BGM:-$(ls -1 "input/$NB"/video-bgm-v*.mp4 2>/dev/null | sort -V | tail -1)}"
+[ -n "$BGM_FILE" ] || { echo "MISSING: no input/$NB/video-bgm-v*.mp4 — run the video-bgm step first"; exit 1; }
+```
+
+Then copy into the upload tree:
 
 ```bash
 mkdir -p "output/$NB/video" "output/$NB/spider"
-cp "input/$NB/video.mp4"      "output/$NB/video/video.mp4"
+cp "$BGM_FILE"                "output/$NB/video/video.mp4"
 cp "input/$NB/cover.png"      "output/$NB/video/cover.png"
 cp "input/$NB/title.json"     "output/$NB/spider/title.json"
 cp "input/$NB/description.md" "output/$NB/spider/description.md"
 cp "input/$NB/tags.json"      "output/$NB/spider/tags.json"
 ```
 
-## Step 7: Publish
+> Publishing without BGM is not allowed. If the user explicitly wants a music-free upload, pass `VIDEO_BGM="input/$NB/video-watermarked.mp4"` — the gate still requires an explicit choice.
+
+---
+
+## Step 8: Publish
 
 Upload to desired platform(s) via PVA CLI:
 
@@ -267,7 +300,9 @@ npx pva kuaishou login
 ls -la node_modules/@panda-video-automation/pva/playwright/.auth/
 ```
 
-Uploads read from **`output/$NB/`** — the upload-ready copy that Step 6 (or prep-upload's Step 8) fills. `input/$NB/` is the working area; never upload from it, or a half-trimmed or unwatermarked intermediate can go out.
+> ⚠️ **A missing `<platform>.json` means that platform will fail** — the browser never gets a session and the upload dies with `Error: Not logged in! Please run login script first:`. Auth lives inside `node_modules`, so a dependency reinstall wipes it silently. Report the affected platforms and ask the user to log in; do not run `login` unprompted (it is interactive and deletes the old auth file before saving a new one). Full detail: [pva-publisher](.agents/skills/pva-publisher/SKILL.md) → Pitfalls 4-6. A present-but-stale file can still be rejected — the upload itself is the only real test.
+
+Uploads read from **`output/$NB/`** — the upload-ready copy that Step 7 fills. `input/$NB/` is the working area; never upload from it, or a pre-BGM or unwatermarked intermediate can go out.
 
 Batch upload to all 4 platforms in parallel:
 
@@ -307,7 +342,8 @@ done
 | bilibili | `Success: Bilibili` | ✅ asserts success |
 | kuaishou | `内容发布成功` | ✅ asserts success |
 | weixin | `Success: Weixin` | ✅ asserts success |
-| douyin | `Success: Douyin (check manually)` | ⚠️ **clicked publish, did not assert** — verify in the app |
+| douyin | `Success: Douyin` | ✅ asserts redirect to `/creator-micro/content/manage` (pva ≥ v0.1.12) |
+| douyin (old pva) | `Success: Douyin (check manually)` | ⚠️ clicked publish only — verify in the app |
 
 `--video`/`--cover` must be **absolute paths** — the `pva` CLI runs Playwright with its own `cwd`, so relative paths fail.
 
@@ -319,19 +355,23 @@ After pipeline completes:
 
 ```
 input/
-├── watermark.png      (shared watermark source — never moves)
+├── watermark.png          (shared watermark source — never moves)
+├── bgm/                   (optional shared music library)
 └── <slug>/
-    ├── video.mp4      (trimmed + watermark applied)
+    ├── research-report.md
+    ├── video.mp4          (clean master — untouched)
+    ├── video-watermarked.mp4
+    ├── video-bgm-v<N>.mp4 (approved BGM mix)
     ├── title.json
-    ├── description.md (≤3 topics)
-    ├── tags.json      (≤3 tags)
-    └── cover.png      (minimalist cover)
+    ├── description.md
+    ├── tags.json
+    └── cover.png
 
 output/
 └── <slug>/
     ├── video/
-    │   ├── video.mp4  (ready for upload)
-    │   └── cover.png  (ready for upload)
+    │   ├── video.mp4      (approved BGM version, ready for upload)
+    │   └── cover.png
     └── spider/
         ├── title.json
         ├── description.md
@@ -346,20 +386,18 @@ output/
 
 **Agent — just do it, no unnecessary questions:**
 1. **Step 0** → Workspace: pick the slug, `mkdir -p "input/$NB"`
-2. **Step 1** → Research (create, deep research, import, summarize)
-3. **Step 2** → Generate video (background, tell user ~5 min)
-4. **Step 3** → Download video → Add watermark → Trim last 4s
-5. **Step 4** → Generate meta files (titles, description, tags)
-6. **Step 5** → Generate cover
-7. **Step 6** → Prepare for upload
-8. **Step 7** → Ask user which platform to publish to
+2. **Step 1** → Research + report (create notebook, deep research, import, `report create` + `download report`)
+3. **Step 2** → Hand off to the external HyperFrames project; tell user the ETA; wait for `input/$NB/video.mp4`
+4. **Step 3** → Watermark the clean master
+5. **Step 4** → BGM (0.6 volume, 10 s fade)
+6. **Step 5** → Meta files (title, description, tags)
+7. **Step 6** → Cover
+8. **Step 7** → Prepare upload (latest BGM version)
+9. **Step 8** → Ask user which platform to publish to
 
-**User:** "check progress"
+**User:** "check progress" / "status"
 
-**Agent:**
-```bash
-nlm studio status <notebook-id> -j
-```
+→ invoke the [pipeline-status](.agents/skills/pipeline-status/SKILL.md) skill.
 
 ---
 
@@ -370,10 +408,13 @@ When user asks for status/progress, invoke the [pipeline-status](.agents/skills/
 ## Core Rules
 
 - **One folder per notebook:** every run works inside `input/<slug>/`, named with an English kebab-case slug. Never write pipeline artifacts to the `input/` root, and never overwrite another notebook's folder. `watermark.png` is the single exception — it stays at the `input/` root.
-- **Non-Blocking:** Launch operations and return immediately. Check status later with `nlm research status <id> --max-wait 0` / `nlm studio status <id> -j` — both are instant snapshots.
-- **No Background Waiting:** Never park a waiting process. No polling loop, no monitor/watch task, no long-poll flag (`--max-wait 300`), no "I'll continue automatically when it finishes". Launch the operation, tell the user the ETA (~5 min), then **end the turn**. The user waits and comes back — the agent does not. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
+- **Clean master immutable:** `input/<slug>/video.mp4` is written only by the external renderer. Never overwrite, move, trim, or message it in place.
+- **BGM versions append-only:** every mix writes the next `video-bgm-v<N>.mp4`; never overwrite an existing version.
+- **Non-Blocking:** Launch remote operations and return immediately. Check status later with `nlm research status <id> --max-wait 0` / `nlm studio status <id> -j` — both are instant snapshots.
+- **No Background Waiting:** Never park a waiting process. No polling loop, no monitor/watch task, no long-poll flag (`--max-wait 300`), no "I'll continue automatically when it finishes". Launch the operation, tell the user the ETA, then **end the turn**. The user waits and comes back — the agent does not. See [notebooklm-research](.agents/skills/notebooklm-research/SKILL.md) → "Never park a waiting process".
 - **No Unnecessary Confirmations:** Proceed directly unless genuinely ambiguous.
-- **Watermark Always:** Every downloaded video gets `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before trimming.
+- **Watermark Always:** Every video gets the `熊猫视频自动化引擎` + `https://panda.szhshp.org` watermark in the bottom-right corner before BGM and before upload.
+- **BGM Always:** Every published video carries the BGM mix (volume 0.6, last 10 s fade-out), unless the user explicitly opts out.
 - **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/<slug>/`.
-- **Upload from `output/<slug>/` only:** `input/` holds working files; `output/` holds the upload-ready copies filled by Step 6. Publishing straight from `input/` can ship an untrimmed or unwatermarked video.
-- **Trim Always:** Every downloaded video gets last 4 seconds trimmed.
+- **Upload from `output/<slug>/` only:** `input/` holds working files; `output/` holds the upload-ready copies filled by Step 7. Publishing straight from `input/` can ship a pre-BGM or unwatermarked video.
+- **No NotebookLM video:** `nlm video create`, `nlm download video`, and the 4-second bumper trim are gone from this pipeline. Do not reintroduce them.

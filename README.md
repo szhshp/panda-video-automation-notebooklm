@@ -42,8 +42,8 @@
       <p>使用 <code>notebooklm-pipeline</code> 技能一站式完成: 创建笔记本, 深度研究, 导入来源, 自动完成 NotebookLM 研究流程. </p>
     </td>
     <td width="33%" valign="top">
-      <h3>🎬 <mark>一键</mark>视频生成</h3>
-      <p>从 NotebookLM 笔记本一键导出视频制品, 自动下载并准备上传. 全程无需手动操作. </p>
+      <h3>🎬 <mark>一键</mark>讲解视频</h3>
+      <p>根据研究报告生成 1080p30 讲解视频, 自动叠加水印与背景音乐, 再准备上传. 全程无需手动操作. </p>
     </td>
     <td width="33%" valign="top">
       <h3>🚀 <mark>一键</mark>多平台发布</h3>
@@ -73,7 +73,7 @@
 
 把 NotebookLM 里的研究成果一键变成视频, 再自动发到 B 站, 抖音, 视频号——这就是 **Panda Video — NotebookLM**. 
 
-它脱胎于 [Panda Video Generator](https://github.com/szhshp/panda-video-generator) 的视频生产流水线, 上传模块来自 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher). 从创建笔记本, 做研究, 导出视频, 到多平台发布, **一条指令全搞定**. 不用手动下载, 不用反复登录, 不用逐个平台传. 
+它脱胎于 [Panda Video Generator](https://github.com/szhshp/panda-video-generator) 的视频生产流水线, 上传模块来自 [panda-video-automations-publisher](https://github.com/szhshp/panda-video-automations-publisher). 从创建笔记本, 做研究, 生成讲解视频, 加水印和配乐, 到多平台发布, **一条指令全搞定**. 不用手动下载, 不用反复登录, 不用逐个平台传. 
 
 ---
 
@@ -84,7 +84,7 @@
   <img src="docs/assets/demo-1.png" alt="成品展示 · 点击在 Bilibili 播放" width="480" />
 </a>
 
-**🎬 成品展示** — NotebookLM 成品视频示例
+**🎬 成品展示** — 讲解视频示例
 
 ---
 
@@ -98,7 +98,7 @@
 /notebooklm-pipeline 帮我做一个关于「AI 泡沫还能持续多久?」的视频并发布到 B 站和抖音
 ```
 
-Agent 会自动执行: 深度研究 → 视频生成 → 裁剪 → 封面 → 元数据 → 发布, 全程无需人工干预. 
+Agent 会自动执行: 深度研究 → 研究报告 → 讲解视频 (HyperFrames) → 水印 → 配乐 → 元数据 → 封面 → 发布, 全程无需人工干预. 
 
 ### 初次使用
 
@@ -117,22 +117,25 @@ Agent 会自动执行: 深度研究 → 视频生成 → 裁剪 → 封面 → �
 - **Node.js 20+**
   — [@panda-video-automation/pva](https://www.npmjs.com/package/@panda-video-automation/pva)
 - **ffmpeg**
-  — 视频裁剪 ( `brew install ffmpeg` / `apt install ffmpeg` ) 
+  — 水印叠加与配乐混音 ( `brew install ffmpeg` / `apt install ffmpeg` ) 
+- **HyperFrames 项目**
+  — 外部的讲解视频渲染工程 ( 通过 `HYPERFRAMES_ROOT` 指定, 默认 `~/Documents/Dev/Github/hyperframes` ) 
 
 ---
 
 ## 🧩 可用技能
 
+> 完整流程说明 (含外部讲解视频工程的交接契约): [docs/PIPELINE.md](docs/PIPELINE.md)
+
 | 技能 | 说明 |
 |------|------|
-| `notebooklm-pipeline` | **[入口]** 全流程一站式: 研究 → 视频 → 裁剪 → 封面 → 元数据 → 发布 |
-| `setup-pva-notebooklm` | 检查并安装所有前置依赖 (Python, Node.js, notebooklm-mcp-cli, PVA) |
+| `notebooklm-pipeline` | **[入口]** 全流程一站式: 研究 → 报告 → 讲解视频 → 水印 → 配乐 → 元数据 → 封面 → 发布 |
+| `setup-pva-notebooklm` | 检查并安装所有前置依赖 (Python, Node.js, notebooklm-mcp-cli, PVA, ffmpeg) |
 | `notebooklm-status` | 查看所有笔记本及制品状态 |
 | `pipeline-status` | 报告流水线进度 ✅/⚠️ 清单 (响应 "status" / "check progress") |
-| `notebooklm-research` | 创建笔记本并执行深度研究 (子步骤) |
-| `notebooklm-video` | 从笔记本生成视频 (子步骤) |
-| `get-notebooklm-video` | 下载视频制品 (子步骤) |
-| `notebooklm-prep-upload` | 准备上传内容到 input/ 文件夹 (子步骤) |
+| `notebooklm-research` | 创建笔记本, 执行深度研究并下载研究报告 (子步骤) |
+| `video-bgm` | 为水印后的视频添加背景音乐 (子步骤) |
+| `notebooklm-prep-upload` | 选择配乐版本并准备上传内容到 output/ 文件夹 (子步骤) |
 | `minimalist-academic-cover` | 生成极简学术风格封面 (子步骤) |
 | `pva-publisher` | 跨平台视频上传 (子步骤) |
 

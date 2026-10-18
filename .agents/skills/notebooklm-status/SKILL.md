@@ -1,6 +1,6 @@
 ---
 name: notebooklm-status
-description: List all NotebookLM notebooks and show their artifact status (video, infographic, etc.) in a summary table.
+description: List all NotebookLM notebooks and show their artifact status (reports, infographics, etc.) in a summary table.
 ---
 
 # NotebookLM Status Overview
@@ -39,7 +39,7 @@ Collect all artifacts from all notebooks.
 
 Present a summary table to the user with:
 - Notebook title
-- Artifact type (Video, Infographic, etc.)
+- Artifact type (Report, Infographic, etc.)
 - Artifact title
 - Status (completed / in_progress / failed)
 

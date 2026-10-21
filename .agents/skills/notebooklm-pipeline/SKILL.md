@@ -124,7 +124,31 @@ mv "input/$NB/video-trimmed.mp4" "input/$NB/video.mp4"
 
 ## Step 4: Generate Meta Files
 
-### 4a. Generate Engaging Title
+### 4a. Platform-Safe Wording (applies to every text artifact)
+
+Everything generated here ships to Chinese social platforms (Bilibili, Douyin, Kuaishou, WeChat Channels). Platform review suppresses or rejects wording that reads as violent, confrontational, or politically charged. Write all published text — title, description, tags, cover text, and the video prompt — in a calm, factual register.
+
+Preferred substitutions:
+
+| Avoid | Use instead |
+|---|---|
+| 骚乱 / 暴乱 / 动乱 | 抗议活动 / 群体聚集 / 社会秩序事件 |
+| 暴力冲突 / 血腥 | 冲突 / 对峙 / 现场秩序混乱 |
+| 打砸抢烧 / 纵火 | 公共设施受损 / 火情 / 财产损失 |
+| 暴徒 / 暴民 | 部分人员 / 参与人群 |
+| 镇压 / 清场 / 强行驱散 | 现场处置 / 秩序维护 |
+| 被捕 / 拘留 | 被警方带走 / 接受调查 |
+| 民众抗争 / 反抗 | 民众表达诉求 |
+| 死伤惨重 / 尸横遍野 | 有人受伤 / 出现人员伤亡（不展开细节） |
+
+Additional constraints:
+
+- **No graphic detail.** Do not describe injuries, deaths, or violence scene-by-scene. State the general fact and move on.
+- **No political framing.** Do not editorialize about institutions, blame named officials, or speculate about motives beyond what sources state.
+- **Accuracy over softening.** Neutral wording may generalize a fact, but must never invert its meaning, invent a benign interpretation, or drop a material fact. If a fact cannot be stated safely in plain words, state it more generally rather than changing it.
+- **No sensational punctuation.** No exclamation marks, no 「震惊」「炸了」「全网沸腾」-style hooks.
+
+### 4b. Generate Engaging Title
 
 Generate a title directly from the artifact title — **do NOT ask the user to confirm or choose**. Decide it yourself and use it immediately.
 
@@ -134,13 +158,13 @@ Generate a title directly from the artifact title — **do NOT ask the user to c
 
 The decided short title goes into `title.json` and as the first line of `description.md`.
 
-### 4b. Create title.json
+### 4c. Create title.json
 
 ```bash
 echo '{"title": "<decided-short-title>"}' > "input/$NB/title.json"
 ```
 
-### 4c. Create description.md
+### 4d. Create description.md
 
 Format: first line = headline title, then ≤3 topic lines, each ≤50 characters.
 
@@ -184,7 +208,7 @@ VIDEO_DESC="<video-title>
 3. <topic-3>" npx pva bilibili upload
 ```
 
-### 4d. Create tags.json
+### 4e. Create tags.json
 
 Pick ≤3 most relevant tags for the topic.
 
@@ -377,3 +401,4 @@ When user asks for status/progress, invoke the [pipeline-status](.agents/skills/
 - **Meta Files Always Required:** Every pipeline run must generate `title.json`, `description.md`, `tags.json`, and `cover.png` in `input/<slug>/`.
 - **Upload from `output/<slug>/` only:** `input/` holds working files; `output/` holds the upload-ready copies filled by Step 6. Publishing straight from `input/` can ship an untrimmed or unwatermarked video.
 - **Trim Always:** Every downloaded video gets last 4 seconds trimmed.
+- **Platform-Safe Wording Always:** Every published text artifact (title, description, tags, cover text) follows the Step 4a wording table. Content is written for Chinese social platforms, so calm factual vocabulary wins over vivid or confrontational phrasing — without changing the underlying facts.
